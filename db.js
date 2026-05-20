@@ -53,6 +53,13 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_pred_user ON predictions(user_id);
   CREATE INDEX IF NOT EXISTS idx_pred_match ON predictions(match_id);
   CREATE INDEX IF NOT EXISTS idx_match_round ON matches(round);
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    sid  TEXT PRIMARY KEY,
+    sess TEXT NOT NULL,
+    expired INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_sessions_expired ON sessions(expired);
 `);
 
 // Helper para transacciones (node:sqlite no tiene db.transaction)
