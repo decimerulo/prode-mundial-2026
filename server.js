@@ -1,6 +1,6 @@
 // server.js - aplicación principal Express
 const express = require('express');
-const session = require('express-session');
+const cookieSession = require('cookie-session');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const db = require('./db');
@@ -18,47 +18,6 @@ try {
   }
 } catch (e) { /* ignore */ }
 
-// ─── Session store persistente en SQLite (sin dependencias extra) ────────────
-class SQLiteSessionStore extends session.Store {
-  constructor(database) {
-    super();
-    this._db = database;
-    // Limpiar sesiones expiradas cada 15 minutos
-    setInterval(() => {
-      try { this._db.prepare('DELETE FROM sessions WHERE expired < ?').run(Date.now()); }
-      catch (e) { /* ignore */ }
-    }, 15 * 60 * 1000).unref();
-  }
-
-  get(sid, cb) {
-    try {
-      const row = this._db.prepare('SELECT sess, expired FROM sessions WHERE sid = ?').get(sid);
-      if (!row) return cb(null, null);
-      if (row.expired < Date.now()) { this.destroy(sid, () => {}); return cb(null, null); }
-      cb(null, JSON.parse(row.sess));
-    } catch (e) { cb(e); }
-  }
-
-  set(sid, sessionData, cb) {
-    try {
-      const ttl = sessionData.cookie?.maxAge ?? (1000 * 60 * 60 * 24 * 60);
-      const expired = Date.now() + ttl;
-      this._db.prepare(`
-        INSERT INTO sessions (sid, sess, expired) VALUES (?, ?, ?)
-        ON CONFLICT(sid) DO UPDATE SET sess = excluded.sess, expired = excluded.expired
-      `).run(sid, JSON.stringify(sessionData), expired);
-      cb(null);
-    } catch (e) { cb(e); }
-  }
-
-  destroy(sid, cb) {
-    try { this._db.prepare('DELETE FROM sessions WHERE sid = ?').run(sid); cb(null); }
-    catch (e) { cb(e); }
-  }
-
-  touch(sid, sessionData, cb) { this.set(sid, sessionData, cb); }
-}
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -67,13 +26,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(session({
-  store: new SQLiteSessionStore(db),
+app.use(cookieSession({
+  name: 'quiniela_sess',
   secret: process.env.SESSION_SECRET || 'cambia-este-secret',
-  resave: false,
-  saveUninitialized: false,
-  rolling: true, // renueva la cookie en cada request activo
-  cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 60 } // 60 días
+  maxAge: 1000 * 60 * 60 * 24 * 60, // 60 días en el browser
+  httpOnly: true,
+  sameSite: 'lax'
 }));
 
 // Parsea "HH:MM UTC±N" y devuelve un Date en UTC representando el inicio del partido
@@ -226,7 +184,8 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  req.session.destroy(() => res.redirect('/login'));
+  req.session = null;
+  res.redirect('/login');
 });
 
 // ----- Pantalla de partidos / pronósticos -----
