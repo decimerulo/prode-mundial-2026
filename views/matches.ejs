@@ -11,18 +11,20 @@
     <h2><%= g.round %></h2>
     <div class="matches">
       <% g.matches.forEach(function(m){ %>
-        <% const locked = m.finished === 1; %>
-        <div class="match <%= locked ? 'locked' : '' %>">
+        <div class="match <%= m.locked ? 'locked' : '' %>">
           <div class="match-meta">
-            <span class="date">📅 <%= m.match_date %><%= m.match_time ? ' · ⏰ ' + m.match_time : '' %></span>
+            <span class="date">📅 <%= m.matchTimeART %></span>
             <% if (m.grp) { %><span class="group">🏆 <%= m.grp %></span><% } %>
             <% if (m.ground) { %><span class="ground">🏟️ <%= m.ground %></span><% } %>
+            <% if (m.locked && !m.finished) { %>
+              <span class="lock-badge">🔒 Cerrado</span>
+            <% } %>
           </div>
           <form method="post" action="/predict/<%= m.id %>" class="match-form">
             <div class="team team-left">
               <span class="team-name"><%= m.team1 %></span>
               <span class="flag"><%= getFlag(m.team1) %></span>
-              <select name="goals1" <%= locked ? 'disabled' : '' %> class="goals-select">
+              <select name="goals1" <%= m.locked ? 'disabled' : '' %> class="goals-select">
                 <% for (let i=0;i<=15;i++){ %>
                   <option value="<%= i %>" <%= (m.pred_goals1 != null && m.pred_goals1 === i) ? 'selected' : '' %>><%= i %></option>
                 <% } %>
@@ -30,7 +32,7 @@
             </div>
             <div class="vs">VS</div>
             <div class="team team-right">
-              <select name="goals2" <%= locked ? 'disabled' : '' %> class="goals-select">
+              <select name="goals2" <%= m.locked ? 'disabled' : '' %> class="goals-select">
                 <% for (let i=0;i<=15;i++){ %>
                   <option value="<%= i %>" <%= (m.pred_goals2 != null && m.pred_goals2 === i) ? 'selected' : '' %>><%= i %></option>
                 <% } %>
@@ -38,9 +40,9 @@
               <span class="flag"><%= getFlag(m.team2) %></span>
               <span class="team-name"><%= m.team2 %></span>
             </div>
-            <% if (!locked) { %>
+            <% if (!m.locked) { %>
               <button class="primary" type="submit">Guardar</button>
-            <% } else { %>
+            <% } else if (m.finished) { %>
               <div class="result">
                 Final: <b><%= m.goals1 %> – <%= m.goals2 %></b>
                 <% if (m.pred_goals1 != null) { %>
@@ -48,6 +50,14 @@
                   <span class="points"><%= m.points %> pts</span>
                 <% } else { %>
                   · <i>sin pronóstico</i>
+                <% } %>
+              </div>
+            <% } else { %>
+              <div class="result">
+                <% if (m.pred_goals1 != null) { %>
+                  Tu pronóstico: <b><%= m.pred_goals1 %> – <%= m.pred_goals2 %></b> · esperando resultado...
+                <% } else { %>
+                  <i>Sin pronóstico registrado</i>
                 <% } %>
               </div>
             <% } %>

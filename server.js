@@ -33,23 +33,45 @@ app.use(session({
   cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 } // 7 días
 }));
 
-// helper para vistas: usuario actual + mensajes flash + banderas + fechas en ART
-function formatDateART(dateStr, timeStr) {
+// Parsea "HH:MM UTC±N" y devuelve un Date en UTC representando el inicio del partido
+function parseMatchUTC(match) {
+  if (!match.match_date || !match.match_time) return null;
+  const m = match.match_time.trim().match(/^(\d{1,2}):(\d{2})(?:\s+UTC([+-]\d+))?/);
+  if (!m) return null;
+  const hh = parseInt(m[1], 10);
+  const mm = parseInt(m[2], 10);
+  const offsetHours = m[3] ? parseInt(m[3], 10) : 0;
+  // Construir como si fuera UTC, luego restar el offset para obtener UTC real
+  // "13:00 UTC-6" => UTC = 13:00 - (-6h) = 19:00 UTC
+  const local = new Date(`${match.match_date}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00.000Z`);
+  return new Date(local.getTime() - offsetHours * 3600000);
+}
+
+// Devuelve true si ya no se puede modificar el pronóstico
+// (1 minuto antes del inicio del partido o si ya finalizó)
+function isMatchLocked(match) {
+  if (match.finished) return true;
+  const startUTC = parseMatchUTC(match);
+  if (!startUTC) return false;
+  const lockTime = new Date(startUTC.getTime() - 60 * 1000); // 1 min antes
+  return Date.now() >= lockTime.getTime();
+}
+
+// Formatea el horario del partido en zona horaria Argentina (ART, UTC-3)
+function formatMatchTimeART(match) {
+  const startUTC = parseMatchUTC(match);
+  if (!startUTC) return match.match_time || match.match_date || '';
   try {
-    const d = new Date(dateStr + 'T12:00:00Z');
-    const formatter = new Intl.DateTimeFormat('es-AR', {
+    return new Intl.DateTimeFormat('es-AR', {
       timeZone: 'America/Argentina/Buenos_Aires',
-      year: 'numeric',
-      month: '2-digit',
+      weekday: 'short',
       day: '2-digit',
+      month: '2-digit',
       hour: '2-digit',
       minute: '2-digit'
-    });
-    const parts = formatter.formatToParts(d);
-    const result = parts.map(p => p.value).join('');
-    return result;
+    }).format(startUTC);
   } catch {
-    return dateStr;
+    return match.match_time || match.match_date || '';
   }
 }
 
@@ -57,7 +79,8 @@ app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.flash = req.session.flash || null;
   res.locals.getFlag = getFlag;
-  res.locals.formatDateART = formatDateART;
+  res.locals.isMatchLocked = isMatchLocked;
+  res.locals.formatMatchTimeART = formatMatchTimeART;
   delete req.session.flash;
   next();
 });
@@ -176,6 +199,8 @@ app.get('/matches', requireLogin, (req, res) => {
   const groups = [];
   const seen = new Map();
   for (const m of matches) {
+    m.locked = isMatchLocked(m);
+    m.matchTimeART = formatMatchTimeART(m);
     if (!seen.has(m.round)) {
       seen.set(m.round, groups.length);
       groups.push({ round: m.round, matches: [] });
@@ -199,8 +224,11 @@ app.post('/predict/:id', requireLogin, (req, res) => {
     req.session.flash = { type: 'error', msg: 'Partido no encontrado.' };
     return res.redirect('/matches');
   }
-  if (match.finished) {
-    req.session.flash = { type: 'error', msg: 'No podés modificar el pronóstico: el partido ya finalizó.' };
+  if (isMatchLocked(match)) {
+    const msg = match.finished
+      ? 'No podés modificar el pronóstico: el partido ya finalizó.'
+      : 'No podés modificar el pronóstico: los pronósticos se cerraron 1 minuto antes del inicio.';
+    req.session.flash = { type: 'error', msg };
     return res.redirect('/matches');
   }
   db.prepare(`
