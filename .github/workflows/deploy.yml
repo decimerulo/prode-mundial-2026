@@ -1,0 +1,61 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Package files
+      run: |
+        tar -czf deploy.tar.gz \
+          --exclude=node_modules \
+          --exclude=.git \
+          --exclude=.env \
+          --exclude=*.db \
+          --exclude=data \
+          --exclude=.github \
+          .
+
+    - name: Transfer to EC2
+      run: |
+        scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+          deploy.tar.gz \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/mundial-quiniela/
+
+    - name: Deploy on EC2
+      run: |
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'DEPLOY_SCRIPT'
+        cd /home/${{ secrets.EC2_USER }}/mundial-quiniela
+        tar -xzf deploy.tar.gz
+        rm deploy.tar.gz
+        npm install --omit=dev
+        pm2 restart quiniela
+        sleep 2
+        pm2 status
+        DEPLOY_SCRIPT
+
+    - name: Cleanup
+      run: rm -f ~/.ssh/deploy_key
+
+    - name: Deployment Status
+      if: success()
+      run: echo "✅ Deploy completado en EC2"
+
+    - name: Deployment Failed
+      if: failure()
+      run: echo "❌ Deploy falló - revisar logs"
