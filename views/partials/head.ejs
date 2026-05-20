@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= typeof title !== 'undefined' ? title : 'Quiniela del Mundial 2026' %></title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="/">⚽ Quiniela Mundial 2026</a>
+      <nav>
+        <% if (currentUser) { %>
+          <a href="/matches">Partidos</a>
+          <a href="/ranking">Ranking</a>
+          <% if (currentUser.is_admin) { %><a href="/admin">Admin</a><% } %>
+          <span class="user">👤 <%= currentUser.nickname %></span>
+          <form action="/logout" method="post" style="display:inline">
+            <button type="submit" class="link">Salir</button>
+          </form>
+        <% } else { %>
+          <a href="/login">Ingresar</a>
+          <a href="/register">Registrarme</a>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <% if (flash) { %>
+      <div class="flash <%= flash.type %>"><%= flash.msg %></div>
+    <% } %>

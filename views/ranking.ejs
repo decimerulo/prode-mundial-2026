@@ -1,0 +1,49 @@
+<%- include('partials/head', { title: 'Ranking' }) %>
+<h1>🏆 Ranking general</h1>
+<table class="ranking">
+  <thead>
+    <tr><th>#</th><th>👤 Jugador</th><th>⭐ Puntos</th><th>🎯 Exactos (5)</th><th>✅ Ganadores (2)</th><th>📊 Pronósticos</th></tr>
+  </thead>
+  <tbody>
+    <% if (general.length === 0) { %>
+      <tr><td colspan="6" class="empty">Todavía no hay datos.</td></tr>
+    <% } %>
+    <% general.forEach(function(r,i){
+      const medals = ['🥇', '🥈', '🥉'];
+      const medal = medals[i] || (i+1);
+    %>
+      <tr class="<%= i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '' %>">
+        <td class="pos"><%= medal %></td>
+        <td><strong><%= r.nickname %></strong></td>
+        <td class="points"><b><%= r.points || 0 %></b></td>
+        <td><%= r.exactos || 0 %></td>
+        <td><%= r.ganadores || 0 %></td>
+        <td><%= r.preds || 0 %></td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+
+<h1>Ganadores por ronda</h1>
+<% if (byRound.length === 0) { %>
+  <div class="card"><p>Aún no hay rondas finalizadas.</p></div>
+<% } %>
+<% byRound.forEach(function(entry){
+     const round = entry[0]; const rows = entry[1]; %>
+  <section class="round">
+    <h2><%= round %></h2>
+    <table class="ranking">
+      <thead><tr><th>#</th><th>Jugador</th><th>Puntos</th><th>Exactos</th><th>Ganadores</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function(r,i){ %>
+          <tr class="<%= i === 0 ? 'winner' : '' %>">
+            <td><%= i+1 %></td><td><%= r.nickname %></td>
+            <td><b><%= r.points %></b></td>
+            <td><%= r.exactos %></td><td><%= r.ganadores %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </section>
+<% }); %>
+<%- include('partials/foot') %>

@@ -1,0 +1,60 @@
+<%- include('partials/head', { title: 'Partidos' }) %>
+<h1>Partidos del Mundial</h1>
+<p class="legend">Reglas: <b>5 pts</b> si acertás el resultado exacto · <b>2 pts</b> si solo acertás el ganador o empate · <b>0 pts</b> en otro caso.</p>
+
+<% if (groups.length === 0) { %>
+  <div class="card"><p>Todavía no hay partidos cargados. Avisá al administrador.</p></div>
+<% } %>
+
+<% groups.forEach(function(g){ %>
+  <section class="round">
+    <h2><%= g.round %></h2>
+    <div class="matches">
+      <% g.matches.forEach(function(m){ %>
+        <% const locked = m.finished === 1; %>
+        <div class="match <%= locked ? 'locked' : '' %>">
+          <div class="match-meta">
+            <span class="date">📅 <%= m.match_date %><%= m.match_time ? ' · ⏰ ' + m.match_time : '' %></span>
+            <% if (m.grp) { %><span class="group">🏆 <%= m.grp %></span><% } %>
+            <% if (m.ground) { %><span class="ground">🏟️ <%= m.ground %></span><% } %>
+          </div>
+          <form method="post" action="/predict/<%= m.id %>" class="match-form">
+            <div class="team team-left">
+              <span class="flag"><%= getFlag(m.team1) %></span>
+              <span class="team-name"><%= m.team1 %></span>
+              <select name="goals1" <%= locked ? 'disabled' : '' %> class="goals-select">
+                <% for (let i=0;i<=15;i++){ %>
+                  <option value="<%= i %>" <%= (m.pred_goals1 != null && m.pred_goals1 === i) ? 'selected' : '' %>><%= i %></option>
+                <% } %>
+              </select>
+            </div>
+            <div class="vs">⚽</div>
+            <div class="team team-right">
+              <select name="goals2" <%= locked ? 'disabled' : '' %> class="goals-select">
+                <% for (let i=0;i<=15;i++){ %>
+                  <option value="<%= i %>" <%= (m.pred_goals2 != null && m.pred_goals2 === i) ? 'selected' : '' %>><%= i %></option>
+                <% } %>
+              </select>
+              <span class="team-name"><%= m.team2 %></span>
+              <span class="flag"><%= getFlag(m.team2) %></span>
+            </div>
+            <% if (!locked) { %>
+              <button class="primary" type="submit">Guardar</button>
+            <% } else { %>
+              <div class="result">
+                Final: <b><%= m.goals1 %> - <%= m.goals2 %></b>
+                <% if (m.pred_goals1 != null) { %>
+                  · Tu pronóstico: <%= m.pred_goals1 %>-<%= m.pred_goals2 %>
+                  <span class="points"><%= m.points %> pts</span>
+                <% } else { %>
+                  · <i>sin pronóstico</i>
+                <% } %>
+              </div>
+            <% } %>
+          </form>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+<% }); %>
+<%- include('partials/foot') %>

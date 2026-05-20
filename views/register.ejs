@@ -1,0 +1,19 @@
+<%- include('partials/head', { title: 'Registrarme' }) %>
+<div class="card narrow">
+  <h1>Crear cuenta</h1>
+  <% if (error) { %><div class="flash error"><%= error %></div><% } %>
+  <form method="post" action="/register" autocomplete="off">
+    <label>Nickname
+      <input type="text" name="nickname" required minlength="3" maxlength="32" value="<%= values.nickname || '' %>">
+    </label>
+    <label>Clave
+      <input type="password" name="password" required minlength="4">
+    </label>
+    <label>Confirmación de la clave
+      <input type="password" name="password2" required minlength="4">
+    </label>
+    <button class="primary" type="submit">Registrarme</button>
+  </form>
+  <p class="small">¿Ya tenés cuenta? <a href="/login">Ingresá</a></p>
+</div>
+<%- include('partials/foot') %>

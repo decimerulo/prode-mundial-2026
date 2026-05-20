@@ -1,0 +1,37 @@
+<%- include('partials/head', { title: 'Admin' }) %>
+<h1>Panel de administración</h1>
+<form method="post" action="/admin/reload-fixture" style="margin-bottom:1rem">
+  <button class="secondary" type="submit">↻ Recargar fixture desde la API</button>
+</form>
+
+<% groups.forEach(function(g){ %>
+  <section class="round">
+    <h2><%= g.round %></h2>
+    <div class="matches">
+      <% g.matches.forEach(function(m){ %>
+        <div class="match">
+          <div class="match-meta">
+            <span class="date"><%= m.match_date %><%= m.match_time ? ' · ' + m.match_time : '' %></span>
+            <% if (m.grp) { %><span class="group"><%= m.grp %></span><% } %>
+            <% if (m.ground) { %><span class="ground"><%= m.ground %></span><% } %>
+          </div>
+          <form method="post" action="/admin/result/<%= m.id %>" class="match-form">
+            <div class="team"><span class="team-name"><%= m.team1 %></span>
+              <input type="number" name="goals1" min="0" max="30" value="<%= m.goals1 != null ? m.goals1 : '' %>" required>
+            </div>
+            <div class="vs">vs</div>
+            <div class="team">
+              <input type="number" name="goals2" min="0" max="30" value="<%= m.goals2 != null ? m.goals2 : '' %>" required>
+              <span class="team-name"><%= m.team2 %></span>
+            </div>
+            <button class="primary" type="submit"><%= m.finished ? 'Actualizar' : 'Cargar' %></button>
+            <% if (m.finished) { %>
+              <button class="danger" type="submit" name="clear" value="1" formnovalidate>Borrar</button>
+            <% } %>
+          </form>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+<% }); %>
+<%- include('partials/foot') %>

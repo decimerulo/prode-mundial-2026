@@ -1,0 +1,21 @@
+{
+  "name": "mundial-quiniela",
+  "version": "1.0.0",
+  "description": "Juego de pronosticos del Mundial 2026",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "init-db": "node scripts/init-db.js",
+    "load-fixture": "node scripts/load-fixture.js"
+  },
+  "engines": { "node": ">=22.5" },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "node-fetch": "^2.7.0"
+  },
+  "author": "Mauro",
+  "license": "MIT"
+}

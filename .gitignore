@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.local
+*.db
+*.log
+data/*.db
+.DS_Store
+.vscode/
+*.swp
+.claude/
+package-lock.json
+test_data.sql
