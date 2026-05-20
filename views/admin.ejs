@@ -1,8 +1,40 @@
 <%- include('partials/head', { title: 'Admin' }) %>
 <h1>Panel de administración</h1>
-<form method="post" action="/admin/reload-fixture" style="margin-bottom:1.5rem">
-  <button class="secondary" type="submit">↻ Recargar fixture desde la API</button>
-</form>
+
+<%# ── Sync automático ─────────────────────────────────────────── %>
+<div class="card" style="margin-bottom:1.5rem">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h2 style="margin:0 0 .3rem">🔄 Sync automático de resultados</h2>
+      <% if (lastSync) { %>
+        <% const syncDate = new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).format(lastSync) %>
+        <% if (lastSyncResult && lastSyncResult.ok) { %>
+          <p class="small" style="margin:0">
+            ✅ Último sync: <b><%= syncDate %></b> —
+            <%= lastSyncResult.updated %> partido(s) actualizado(s) de <%= lastSyncResult.total %> con resultado
+          </p>
+        <% } else if (lastSyncResult) { %>
+          <p class="small" style="margin:0;color:#ef4444">
+            ❌ Último sync: <b><%= syncDate %></b> — Error: <%= lastSyncResult.error %>
+          </p>
+        <% } %>
+      <% } else { %>
+        <p class="small" style="margin:0">Sincronizando al iniciar...</p>
+      <% } %>
+      <p class="small" style="margin:.3rem 0 0;color:var(--muted)">Se actualiza automáticamente cada hora desde openfootball</p>
+    </div>
+    <form method="post" action="/admin/sync">
+      <button class="secondary" type="submit">↻ Sync ahora</button>
+    </form>
+  </div>
+</div>
+
+<%# ── Fixture ─────────────────────────────────────────── %>
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
+  <form method="post" action="/admin/reload-fixture">
+    <button class="secondary" type="submit">↻ Recargar fixture (calendario)</button>
+  </form>
+</div>
 
 <% groups.forEach(function(g){ %>
   <section class="round">
@@ -14,6 +46,7 @@
             <span class="date">📅 <%= m.match_date %><%= m.match_time ? ' · ' + m.match_time : '' %></span>
             <% if (m.grp) { %><span class="group">🏆 <%= m.grp %></span><% } %>
             <% if (m.ground) { %><span class="ground">🏟️ <%= m.ground %></span><% } %>
+            <% if (m.finished) { %><span class="lock-badge">✅ Finalizado</span><% } %>
           </div>
           <form method="post" action="/admin/result/<%= m.id %>" class="match-form">
             <div class="team team-left">
@@ -25,7 +58,7 @@
               <input type="number" name="goals2" min="0" max="30" value="<%= m.goals2 != null ? m.goals2 : '' %>" required class="goals-select">
               <span class="team-name"><%= m.team2 %></span>
             </div>
-            <button class="primary" type="submit"><%= m.finished ? 'Actualizar' : 'Cargar' %></button>
+            <button class="primary" type="submit"><%= m.finished ? 'Corregir' : 'Cargar' %></button>
             <% if (m.finished) { %>
               <button class="danger" type="submit" name="clear" value="1" formnovalidate style="grid-column:1/-1;margin-top:8px;justify-self:end">Borrar resultado</button>
             <% } %>

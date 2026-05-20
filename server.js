@@ -303,7 +303,7 @@ app.get('/admin', requireLogin, requireAdmin, (req, res) => {
     }
     groups[seen.get(m.round)].matches.push(m);
   }
-  res.render('admin', { groups });
+  res.render('admin', { groups, lastSync, lastSyncResult });
 });
 
 app.post('/admin/result/:id', requireLogin, requireAdmin, (req, res) => {
@@ -365,6 +365,68 @@ app.post('/admin/reload-fixture', requireLogin, requireAdmin, async (req, res) =
   } catch (e) {
     console.error(e);
     req.session.flash = { type: 'error', msg: 'No se pudo recargar el fixture: ' + e.message };
+  }
+  res.redirect('/admin');
+});
+
+// ─── Sync automático de resultados ───────────────────────────────────────────
+const FIXTURE_URL = process.env.WORLDCUP_JSON_URL ||
+  'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+
+let lastSync = null;      // Date del último intento
+let lastSyncResult = null; // { updated, total, error }
+
+async function syncResults() {
+  const fetch = require('node-fetch');
+  const started = new Date();
+  try {
+    const r = await fetch(FIXTURE_URL, { timeout: 12000 });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+
+    const items = (data.matches || []).filter(m => m.score && m.score.ft);
+    let updated = 0;
+
+    for (const m of items) {
+      const [g1, g2] = m.score.ft;
+      const row = db.prepare(`
+        SELECT id, finished, goals1, goals2
+        FROM matches
+        WHERE round = ? AND match_date = ? AND team1 = ? AND team2 = ?
+      `).get(m.round, m.date, m.team1, m.team2);
+
+      if (!row) continue;
+      // Solo escribir si algo cambió
+      if (row.finished === 1 && row.goals1 === g1 && row.goals2 === g2) continue;
+
+      db.prepare('UPDATE matches SET goals1=?, goals2=?, finished=1 WHERE id=?').run(g1, g2, row.id);
+      recalcMatchPoints(row.id);
+      updated++;
+    }
+
+    lastSync = started;
+    lastSyncResult = { ok: true, updated, total: items.length };
+    if (updated > 0) console.log(`[sync] ${updated} partido(s) actualizado(s) con resultado`);
+
+  } catch (e) {
+    lastSync = started;
+    lastSyncResult = { ok: false, error: e.message };
+    console.error('[sync] Error al sincronizar resultados:', e.message);
+  }
+}
+
+// Sync al arrancar + cada hora
+syncResults();
+setInterval(syncResults, 60 * 60 * 1000);
+
+// Sync manual desde el admin
+app.post('/admin/sync', requireLogin, requireAdmin, async (req, res) => {
+  await syncResults();
+  const r = lastSyncResult;
+  if (r.ok) {
+    req.session.flash = { type: 'success', msg: `Sync OK — ${r.updated} partido(s) actualizado(s) de ${r.total} con resultado.` };
+  } else {
+    req.session.flash = { type: 'error', msg: `Error en sync: ${r.error}` };
   }
   res.redirect('/admin');
 });
