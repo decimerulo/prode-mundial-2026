@@ -20,31 +20,31 @@
           </div>
           <form method="post" action="/predict/<%= m.id %>" class="match-form">
             <div class="team team-left">
-              <span class="flag"><%= getFlag(m.team1) %></span>
               <span class="team-name"><%= m.team1 %></span>
+              <span class="flag"><%= getFlag(m.team1) %></span>
               <select name="goals1" <%= locked ? 'disabled' : '' %> class="goals-select">
                 <% for (let i=0;i<=15;i++){ %>
                   <option value="<%= i %>" <%= (m.pred_goals1 != null && m.pred_goals1 === i) ? 'selected' : '' %>><%= i %></option>
                 <% } %>
               </select>
             </div>
-            <div class="vs">⚽</div>
+            <div class="vs">VS</div>
             <div class="team team-right">
               <select name="goals2" <%= locked ? 'disabled' : '' %> class="goals-select">
                 <% for (let i=0;i<=15;i++){ %>
                   <option value="<%= i %>" <%= (m.pred_goals2 != null && m.pred_goals2 === i) ? 'selected' : '' %>><%= i %></option>
                 <% } %>
               </select>
-              <span class="team-name"><%= m.team2 %></span>
               <span class="flag"><%= getFlag(m.team2) %></span>
+              <span class="team-name"><%= m.team2 %></span>
             </div>
             <% if (!locked) { %>
               <button class="primary" type="submit">Guardar</button>
             <% } else { %>
               <div class="result">
-                Final: <b><%= m.goals1 %> - <%= m.goals2 %></b>
+                Final: <b><%= m.goals1 %> – <%= m.goals2 %></b>
                 <% if (m.pred_goals1 != null) { %>
-                  · Tu pronóstico: <%= m.pred_goals1 %>-<%= m.pred_goals2 %>
+                  · Tu pronóstico: <%= m.pred_goals1 %>–<%= m.pred_goals2 %>
                   <span class="points"><%= m.points %> pts</span>
                 <% } else { %>
                   · <i>sin pronóstico</i>
