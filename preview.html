@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Quiniela Mundial 2026 — Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="public/css/styles.css?v=20260522">
+  <style>
+    .preview-nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(28, 25, 23, 0.92);
+      backdrop-filter: blur(16px);
+      color: #fff;
+      padding: 8px;
+      border-radius: 999px;
+      display: flex;
+      gap: 4px;
+      z-index: 1000;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+    .preview-nav button {
+      background: transparent;
+      border: none;
+      color: #d6d3d1;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .preview-nav button.active {
+      background: #fbbf24;
+      color: #451a03;
+    }
+    .preview-nav button:hover:not(.active) {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .preview-page { display: none; }
+    .preview-page.active { display: block; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="#"><span class="brand-mark"></span><span class="brand-text">Quiniela Mundial 2026</span></a>
+    <nav>
+      <a href="#matches" id="navMatches">Partidos</a>
+      <a href="#ranking" id="navRanking">Ranking</a>
+      <a href="#admin" id="navAdmin">Admin</a>
+      <span class="user">👤 messi</span>
+      <button type="button" class="link">Salir</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ───── LOGIN ───── -->
+  <div class="preview-page" id="page-login">
+    <div class="card narrow">
+      <h1>Ingresar</h1>
+      <form>
+        <label>Nickname
+          <input type="text" name="nickname" value="messi">
+        </label>
+        <label>Clave
+          <input type="password" name="password" value="123456">
+        </label>
+        <button class="primary" type="button">Ingresar</button>
+      </form>
+      <p class="small">¿No tenés cuenta? <a href="#">Registrate</a></p>
+    </div>
+  </div>
+
+  <!-- ───── MATCHES ───── -->
+  <div class="preview-page" id="page-matches">
+    <h1>Partidos del Mundial</h1>
+    <p class="legend">Reglas: <b>5 pts</b> si acertás el resultado exacto · <b>2 pts</b> si solo acertás el ganador o empate · <b>0 pts</b> en otro caso.</p>
+
+    <section class="round">
+      <h2>Fase de grupos · Jornada 1</h2>
+      <div class="matches">
+        <div class="match">
+          <div class="match-meta">
+            <span class="date">📅 11/06/2026 · ⏰ 21:00</span>
+            <span class="group">🏆 Grupo A</span>
+            <span class="ground">🏟️ Estadio Azteca</span>
+          </div>
+          <form class="match-form">
+            <div class="team team-left">
+              <span class="team-name">Argentina</span>
+              <span class="flag">🇦🇷</span>
+              <select class="goals-select"><option>2</option></select>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team team-right">
+              <select class="goals-select"><option>0</option></select>
+              <span class="flag">🇲🇽</span>
+              <span class="team-name">Mexico</span>
+            </div>
+            <button class="primary" type="button">Guardar</button>
+          </form>
+        </div>
+
+        <div class="match">
+          <div class="match-meta">
+            <span class="date">📅 12/06/2026 · ⏰ 18:00</span>
+            <span class="group">🏆 Grupo B</span>
+            <span class="ground">🏟️ MetLife Stadium</span>
+          </div>
+          <form class="match-form">
+            <div class="team team-left">
+              <span class="team-name">Brazil</span>
+              <span class="flag">🇧🇷</span>
+              <select class="goals-select"><option>1</option></select>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team team-right">
+              <select class="goals-select"><option>1</option></select>
+              <span class="flag">🇫🇷</span>
+              <span class="team-name">France</span>
+            </div>
+            <button class="primary" type="button">Guardar</button>
+          </form>
+        </div>
+
+        <div class="match locked">
+          <div class="match-meta">
+            <span class="date">📅 10/06/2026 · ⏰ 21:00</span>
+            <span class="group">🏆 Grupo A</span>
+            <span class="ground">🏟️ SoFi Stadium</span>
+          </div>
+          <form class="match-form">
+            <div class="team team-left">
+              <span class="team-name">Spain</span>
+              <span class="flag">🇪🇸</span>
+              <select class="goals-select" disabled><option>3</option></select>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team team-right">
+              <select class="goals-select" disabled><option>1</option></select>
+              <span class="flag">🇩🇪</span>
+              <span class="team-name">Germany</span>
+            </div>
+            <div class="result">
+              Final: <b>3 – 1</b>
+              · Tu pronóstico: 3–1
+              <span class="points">5 pts</span>
+            </div>
+          </form>
+        </div>
+
+        <div class="match locked">
+          <div class="match-meta">
+            <span class="date">📅 10/06/2026 · ⏰ 18:00</span>
+            <span class="group">🏆 Grupo C</span>
+            <span class="ground">🏟️ Mercedes-Benz Stadium</span>
+          </div>
+          <form class="match-form">
+            <div class="team team-left">
+              <span class="team-name">Portugal</span>
+              <span class="flag">🇵🇹</span>
+              <select class="goals-select" disabled><option>2</option></select>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team team-right">
+              <select class="goals-select" disabled><option>1</option></select>
+              <span class="flag">🇮🇹</span>
+              <span class="team-name">Italy</span>
+            </div>
+            <div class="result">
+              Final: <b>2 – 1</b>
+              · Tu pronóstico: 1–1
+              <span class="points">2 pts</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ───── RANKING ───── -->
+  <div class="preview-page" id="page-ranking">
+    <h1>🏆 Ranking general</h1>
+    <table class="ranking">
+      <thead>
+        <tr><th>#</th><th>Jugador</th><th>Puntos</th><th>Exactos (5)</th><th>Ganadores (2)</th><th>Pronósticos</th></tr>
+      </thead>
+      <tbody>
+        <tr class="rank-1">
+          <td class="pos">🥇</td>
+          <td><strong>messi</strong></td>
+          <td class="points"><b>47</b></td>
+          <td>6</td>
+          <td>8</td>
+          <td>14</td>
+        </tr>
+        <tr class="rank-2">
+          <td class="pos">🥈</td>
+          <td><strong>maradona</strong></td>
+          <td class="points"><b>38</b></td>
+          <td>4</td>
+          <td>9</td>
+          <td>14</td>
+        </tr>
+        <tr class="rank-3">
+          <td class="pos">🥉</td>
+          <td><strong>pele</strong></td>
+          <td class="points"><b>32</b></td>
+          <td>3</td>
+          <td>11</td>
+          <td>14</td>
+        </tr>
+        <tr>
+          <td class="pos">4</td>
+          <td><strong>zidane</strong></td>
+          <td class="points"><b>25</b></td>
+          <td>2</td>
+          <td>9</td>
+          <td>14</td>
+        </tr>
+        <tr>
+          <td class="pos">5</td>
+          <td><strong>cruyff</strong></td>
+          <td class="points"><b>21</b></td>
+          <td>1</td>
+          <td>11</td>
+          <td>14</td>
+        </tr>
+        <tr>
+          <td class="pos">6</td>
+          <td><strong>ronaldo</strong></td>
+          <td class="points"><b>18</b></td>
+          <td>2</td>
+          <td>5</td>
+          <td>13</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h1>Ganadores por ronda</h1>
+    <section class="round">
+      <h2>Fase de grupos · Jornada 1</h2>
+      <table class="ranking">
+        <thead><tr><th>#</th><th>Jugador</th><th>Puntos</th><th>Exactos</th><th>Ganadores</th></tr></thead>
+        <tbody>
+          <tr class="winner"><td>1</td><td>messi</td><td><b>21</b></td><td>3</td><td>3</td></tr>
+          <tr><td>2</td><td>maradona</td><td><b>14</b></td><td>2</td><td>2</td></tr>
+          <tr><td>3</td><td>pele</td><td><b>11</b></td><td>1</td><td>3</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- ───── ADMIN ───── -->
+  <div class="preview-page" id="page-admin">
+    <h1>Panel de administración</h1>
+    <form style="margin-bottom:1.5rem">
+      <button class="secondary" type="button">↻ Recargar fixture desde la API</button>
+    </form>
+    <section class="round">
+      <h2>Fase de grupos · Jornada 1</h2>
+      <div class="matches">
+        <div class="match">
+          <div class="match-meta">
+            <span class="date">📅 11/06/2026 · 21:00</span>
+            <span class="group">🏆 Grupo A</span>
+          </div>
+          <form class="match-form">
+            <div class="team team-left">
+              <span class="team-name">Argentina</span>
+              <input type="number" class="goals-select" value="2">
+            </div>
+            <div class="vs">VS</div>
+            <div class="team team-right">
+              <input type="number" class="goals-select" value="0">
+              <span class="team-name">Mexico</span>
+            </div>
+            <button class="primary" type="button">Actualizar</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="container">Datos del fixture: <a href="#">openfootball/worldcup.json</a> (dominio público)</div>
+</footer>
+
+<div class="preview-nav">
+  <button data-page="login">Login</button>
+  <button data-page="matches" class="active">Partidos</button>
+  <button data-page="ranking">Ranking</button>
+  <button data-page="admin">Admin</button>
+</div>
+
+<script>
+  const nav = document.querySelector('.preview-nav');
+  const pages = document.querySelectorAll('.preview-page');
+  function show(target) {
+    pages.forEach(p => p.classList.toggle('active', p.id === 'page-' + target));
+    nav.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.page === target));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  nav.addEventListener('click', e => {
+    if (e.target.dataset.page) show(e.target.dataset.page);
+  });
+  show('matches');
+</script>
+
+</body>
+</html>

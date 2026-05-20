@@ -1,234 +1,257 @@
 /* ────────────────────────────────────────────────────────────
-   QUINIELA MUNDIAL 2026 · sistema visual
-   Estilo: bento moderno, pastels suaves, dorado FIFA
-   Inspirado en Phantom / soft-pastel finance dashboards
+   QUINIELA MUNDIAL 2026 · look & feel oficial FIFA
+   Inspirado en fifa.com/canadamexicousa2026
    ──────────────────────────────────────────────────────────── */
 
+/* ─── Banderas: webfont para que se vean en Windows también ─── */
+@font-face {
+  font-family: 'Twemoji Country Flags';
+  unicode-range: U+1F1E6-1F1FF, U+1F3F4, U+E0062-E0063, U+E0065, U+E0067, U+E006C, U+E006E, U+E0073-E0074, U+E0077, U+E007F;
+  src: url('https://cdn.jsdelivr.net/npm/country-flag-emoji-polyfill@0.1.8/dist/TwemojiCountryFlags.woff2') format('woff2');
+}
+
 :root {
-  /* Superficies */
-  --bg:           #f5f3f0;
-  --bg-2:         #fefcf9;
-  --surface:      #ffffff;
-  --surface-soft: #fafaf7;
+  /* Superficies — FIFA real palette */
+  --bg:           #ffffff;
+  --bg-2:         #f4f4f4;
+  --bg-3:         #ededed;
+  --row-hover:    #fafafa;
+
+  /* Brand FIFA */
+  --fifa-navy:    #1F4380;
+  --fifa-navy-2:  #2A5599;
+  --fifa-black:   #0A0A0A;
 
   /* Texto */
-  --text:        #1c1917;
-  --text-2:      #44403c;
-  --muted:       #78716c;
-  --dim:         #a8a29e;
+  --text:        #0A0A0A;
+  --text-2:      #3A3A3A;
+  --muted:       #6F6F6F;
+  --dim:         #9A9A9A;
 
   /* Bordes */
-  --border:      #ede9e3;
-  --border-2:    #d6d3d1;
+  --border:      #E5E5E5;
+  --border-2:    #D4D4D4;
 
-  /* Acentos · FIFA gold + pastels */
-  --gold:        #c89414;
-  --gold-2:      #fbbf24;
-  --gold-soft-1: #fef3c7;
-  --gold-soft-2: #fde68a;
-
-  --blue:        #0284c7;
-  --blue-soft-1: #dbeafe;
-  --blue-soft-2: #bfdbfe;
-
-  --violet:      #7c3aed;
-  --violet-soft-1: #ede9fe;
-  --violet-soft-2: #ddd6fe;
-
-  --green:       #15803d;
-  --green-soft:  #dcfce7;
-  --green-soft-2: #bbf7d0;
-
-  --red:         #dc2626;
-  --red-soft:    #fee2e2;
-
-  --orange:      #c2410c;
-  --orange-soft: #ffedd5;
+  /* Acentos */
+  --signature:   #DC2626;
+  --green:       #16A34A;
+  --green-soft:  #DCFCE7;
+  --gold:        #C89414;
+  --gold-soft:   #FEF3C7;
+  --blue:        #1F4380;
+  --blue-soft:   #DBEAFE;
 
   /* Misc */
-  --radius:      20px;
-  --radius-sm:   14px;
-  --radius-xs:   10px;
-  --shadow-xs:   0 1px 2px rgba(28, 25, 23, 0.04);
-  --shadow-sm:   0 2px 6px rgba(28, 25, 23, 0.05);
-  --shadow-md:   0 8px 24px -8px rgba(28, 25, 23, 0.08);
-  --shadow-lg:   0 24px 60px -16px rgba(28, 25, 23, 0.15);
+  --radius:      4px;
+  --radius-sm:   3px;
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.08);
 
-  --font-ui:     'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-num:    'Space Grotesk', 'Inter', sans-serif;
+  --font-ui:     'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display:'Inter', sans-serif;
 }
 
 /* ─────────── Reset ─────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-  font-family: var(--font-ui);
+  font-family: 'Twemoji Country Flags', var(--font-ui);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'cv11', 'ss01';
-}
-
-/* Sutil grid de fondo */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    radial-gradient(circle at 0% 0%, rgba(251, 191, 36, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(124, 58, 237, 0.06) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: 0;
+  line-height: 1.5;
 }
 
 img { max-width: 100%; display: block; }
-a { color: var(--blue); text-decoration: none; transition: color 0.15s; }
-a:hover { color: var(--violet); }
+a { color: var(--fifa-navy); text-decoration: none; transition: color 0.15s; }
+a:hover { color: var(--fifa-navy-2); }
 
-.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
 
-/* ─────────── Topbar ─────────── */
+/* ─────────── Topbar (doble) ─────────── */
 .topbar {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 0;
+  background: var(--fifa-black);
   position: sticky;
   top: 0;
   z-index: 100;
+}
+/* Barra superior navy FIFA */
+.topbar::before {
+  content: '';
+  display: block;
+  height: 56px;
+  background: var(--fifa-navy);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .topbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 24px;
   flex-wrap: wrap;
+  min-height: 64px;
+  position: relative;
 }
+
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: var(--text);
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: -0.015em;
+  gap: 14px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
-.brand::before {
-  content: '⚽';
-  width: 32px; height: 32px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--gold-2) 0%, #f59e0b 100%);
-  display: grid; place-items: center;
-  font-size: 17px;
-  box-shadow: 0 4px 14px -4px rgba(245, 158, 11, 0.4);
+.brand-mark {
+  display: block;
+  width: 38px;
+  height: 38px;
+  background: #fff;
+  border-radius: 6px;
+  flex-shrink: 0;
+  position: relative;
 }
-.brand { text-decoration: none; }
-.brand::after { content: ''; }
-
-/* Sobrescribir el emoji que viene en el texto */
-.topbar .brand { font-size: 0; }
-.topbar .brand::before { font-size: 17px; }
-.topbar .brand-text { font-size: 16px; }
+.brand-mark::before {
+  content: '🏆';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+}
+.brand-text {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+  line-height: 1.2;
+  white-space: nowrap;
+}
 
 .topbar nav {
   display: flex;
-  gap: 6px;
+  gap: 0;
   align-items: center;
   flex-wrap: wrap;
 }
 .topbar nav a {
-  color: var(--text-2);
-  font-weight: 500;
-  font-size: 14px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  transition: background 0.15s, color 0.15s;
-}
-.topbar nav a:hover {
-  background: var(--surface);
-  color: var(--text);
-}
-.topbar nav a.active {
-  background: var(--text);
   color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 22px 18px;
+  position: relative;
+  transition: color 0.15s;
 }
+.topbar nav a:hover { color: #BFD3EE; }
+.topbar nav a.active::after,
+.topbar nav a:hover::after {
+  content: '';
+  position: absolute;
+  left: 18px; right: 18px; bottom: 14px;
+  height: 2px;
+  background: #fff;
+}
+
 .user {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--gold-soft-1);
-  color: #78350f;
-  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  border: 1px solid rgba(217, 119, 6, 0.2);
+  letter-spacing: 0.04em;
+  margin-left: 8px;
 }
+
 button.link {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #fff;
   cursor: pointer;
   padding: 7px 14px;
-  font-weight: 500;
-  font-size: 13.5px;
-  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 3px;
   font-family: var(--font-ui);
   transition: all 0.15s;
+  margin-left: 8px;
 }
 button.link:hover {
-  background: var(--red-soft);
-  color: var(--red);
-  border-color: rgba(220, 38, 38, 0.2);
+  background: #fff;
+  color: var(--fifa-black);
+  border-color: #fff;
 }
 
-/* ─────────── Main / títulos ─────────── */
-main { padding: 32px 0 64px; }
+/* ─────────── Main ─────────── */
+main { padding: 32px 0 80px; background: var(--bg); min-height: calc(100vh - 120px); }
+
 h1 {
-  font-family: var(--font-num);
-  font-size: 38px;
+  font-size: 32px;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  color: var(--text);
-  margin-bottom: 20px;
-}
-h2 {
-  font-family: var(--font-num);
-  font-size: 22px;
-  font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   color: var(--text);
   margin-bottom: 16px;
+  text-transform: lowercase;
+  padding: 24px 0 12px;
+  border-bottom: 1px solid var(--border);
 }
+h2::first-letter { text-transform: uppercase; }
 
-/* ─────────── Cards / tarjetas base ─────────── */
+/* ─────────── Cards base ─────────── */
 .card {
-  background: var(--surface);
+  background: var(--bg);
   border-radius: var(--radius);
-  padding: 28px;
-  box-shadow: var(--shadow-sm);
+  padding: 32px;
   border: 1px solid var(--border);
   margin-bottom: 20px;
 }
 .card.narrow {
-  max-width: 440px;
-  margin: 48px auto;
+  max-width: 420px;
+  margin: 64px auto;
   padding: 36px;
-  background: linear-gradient(160deg, var(--surface) 0%, var(--bg-2) 100%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+.card.narrow::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--fifa-navy);
 }
 
 /* ─────────── Forms ─────────── */
 form label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text-2);
   margin-bottom: 6px;
-  margin-top: 14px;
-  letter-spacing: -0.005em;
+  margin-top: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 form label:first-of-type { margin-top: 0; }
 
@@ -239,168 +262,146 @@ form select {
   width: 100%;
   padding: 12px 14px;
   border: 1.5px solid var(--border-2);
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius);
   font-size: 15px;
-  background: var(--surface-soft);
+  background: var(--bg);
   color: var(--text);
   font-family: inherit;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 form input:focus,
 form select:focus {
   outline: none;
-  border-color: var(--gold-2);
-  background: var(--surface);
-  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.15);
+  border-color: var(--fifa-navy);
+  box-shadow: 0 0 0 3px rgba(31, 67, 128, 0.12);
 }
 
 button.primary {
-  background: linear-gradient(135deg, var(--text) 0%, #292524 100%);
+  background: var(--fifa-navy);
   color: #fff;
   border: none;
-  padding: 12px 22px;
-  border-radius: var(--radius-xs);
+  padding: 12px 24px;
+  border-radius: var(--radius);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  font-family: inherit;
-  margin-top: 18px;
-  transition: transform 0.12s, box-shadow 0.15s;
-  box-shadow: var(--shadow-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 20px;
+  transition: background 0.15s;
 }
-button.primary:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-button.primary::after { content: '→'; }
+button.primary:hover { background: var(--fifa-navy-2); }
 
 button.secondary {
-  background: var(--surface);
-  color: var(--text);
-  border: 1.5px solid var(--border-2);
-  padding: 10px 18px;
-  border-radius: var(--radius-xs);
+  background: var(--bg);
+  color: var(--fifa-navy);
+  border: 1.5px solid var(--fifa-navy);
+  padding: 11px 20px;
+  border-radius: var(--radius);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  font-family: inherit;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   transition: all 0.15s;
 }
-button.secondary:hover {
-  background: var(--gold-soft-1);
-  border-color: var(--gold-2);
-}
+button.secondary:hover { background: var(--fifa-navy); color: #fff; }
 
 button.danger {
-  background: var(--red-soft);
-  color: var(--red);
-  border: 1.5px solid rgba(220, 38, 38, 0.2);
+  background: var(--bg);
+  color: var(--signature);
+  border: 1.5px solid var(--signature);
   padding: 8px 14px;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 13px;
-  font-family: inherit;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
-button.danger:hover { background: #fecaca; }
+button.danger:hover { background: var(--signature); color: #fff; }
 
 /* ─────────── Flash messages ─────────── */
 .flash {
   padding: 14px 18px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   margin-bottom: 20px;
   font-weight: 500;
   font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  border-left: 4px solid;
 }
 .flash.error {
-  background: var(--red-soft);
-  color: #7f1d1d;
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  background: #FEF2F2;
+  color: #7F1D1D;
+  border-left-color: var(--signature);
 }
-.flash.error::before { content: '⚠'; font-size: 18px; }
 .flash.success {
   background: var(--green-soft);
-  color: #14532d;
-  border: 1px solid rgba(21, 128, 61, 0.2);
+  color: #14532D;
+  border-left-color: var(--green);
 }
-.flash.success::before { content: '✓'; font-size: 18px; }
 
 /* ─────────── Legend (reglas) ─────────── */
 .legend {
-  background: linear-gradient(135deg, var(--gold-soft-1) 0%, var(--gold-soft-2) 100%);
-  border: 1px solid rgba(217, 119, 6, 0.2);
-  color: #78350f;
-  padding: 16px 20px;
-  border-radius: var(--radius-sm);
+  background: #F8F9FA;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--fifa-navy);
+  color: var(--text-2);
+  padding: 14px 20px;
+  border-radius: var(--radius);
   font-size: 14px;
-  margin-bottom: 24px;
-  position: relative;
-  overflow: hidden;
+  margin-bottom: 28px;
+  line-height: 1.6;
 }
-.legend::before {
-  content: '📋';
+.legend b {
+  color: var(--fifa-navy);
+  font-weight: 700;
   font-size: 14px;
-  margin-right: 6px;
 }
-.legend b { color: #451a03; font-weight: 700; }
 
 /* ─────────── Rondas ─────────── */
 .round {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 22px 28px 28px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
-  margin-bottom: 22px;
+  background: transparent;
+  margin-bottom: 36px;
 }
 .round h2 {
-  margin: 4px 0 18px;
-  padding-bottom: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: capitalize;
+  letter-spacing: 0;
+  padding: 16px 0 12px;
   border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-.round h2::before {
-  content: '';
-  width: 4px;
-  height: 22px;
-  background: linear-gradient(180deg, var(--gold-2), var(--gold));
-  border-radius: 2px;
+  justify-content: space-between;
 }
 
 .matches {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-top: none;
 }
 
-/* ─────────── Partido (card) ─────────── */
+/* ─────────── Partido (row) ─────────── */
 .match {
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 18px 20px;
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  background: var(--bg);
+  padding: 22px 24px;
+  transition: background 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-.match:hover {
-  border-color: var(--gold-2);
-  box-shadow: var(--shadow-sm);
-  background: var(--surface);
-}
-.match.locked {
-  background: linear-gradient(160deg, var(--violet-soft-1) 0%, #f5f3ff 100%);
-  border-color: rgba(124, 58, 237, 0.15);
-}
-.match.locked:hover {
-  border-color: rgba(124, 58, 237, 0.3);
-}
+.match:hover { background: var(--row-hover); }
+.match.locked { background: var(--bg-2); }
+.match.locked:hover { background: var(--bg-3); }
 
 .match-meta {
   display: flex;
@@ -408,58 +409,74 @@ button.danger:hover { background: #fecaca; }
   flex-wrap: wrap;
   font-size: 12px;
   color: var(--muted);
-  margin-bottom: 14px;
   align-items: center;
+  order: 2;
+  justify-content: center;
 }
 .match-meta .date,
-.match-meta .ground {
+.match-meta .ground,
+.match-meta .group {
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--surface);
-  padding: 4px 10px;
-  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
   font-weight: 500;
-  border: 1px solid var(--border);
+}
+.match-meta .date::after,
+.match-meta .group::after {
+  content: '·';
+  margin-left: 8px;
+  color: var(--dim);
 }
 .match-meta .group {
-  background: linear-gradient(135deg, var(--gold-soft-1), var(--gold-soft-2));
-  color: #78350f;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 11.5px;
-  letter-spacing: 0.02em;
-  border: 1px solid rgba(217, 119, 6, 0.2);
+  color: var(--fifa-navy);
+  font-weight: 600;
+}
+.match-meta .ground {
+  color: var(--muted);
 }
 
 .match-form {
   display: grid;
-  grid-template-columns: 1fr auto 1fr auto;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
+  order: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
 }
 .match-form .team {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
-.match-form .team-left { justify-content: flex-end; }
-.match-form .team-right { justify-content: flex-start; }
+.match-form .team-left {
+  justify-content: flex-end;
+}
+.match-form .team-right {
+  justify-content: flex-start;
+}
+
 .match-form .flag {
+  font-family: 'Twemoji Country Flags', var(--font-ui);
   font-size: 28px;
   line-height: 1;
   flex-shrink: 0;
 }
 .match-form .team-name {
   font-weight: 600;
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text);
   letter-spacing: -0.005em;
 }
-.match-form .team-left .team-name { order: 1; text-align: right; }
-.match-form .team-left .flag       { order: 2; }
-.match-form .team-left .goals-select { order: 3; }
+
+/* Orden: name flag select | select flag name */
+.match-form .team-left .team-name   { order: 1; text-align: right; }
+.match-form .team-left .flag        { order: 2; }
+.match-form .team-left .goals-select{ order: 3; }
 
 .match-form .team-right .goals-select { order: 1; }
 .match-form .team-right .flag         { order: 2; }
@@ -470,12 +487,12 @@ button.danger:hover { background: #fecaca; }
   height: 56px !important;
   padding: 0 !important;
   border: 2px solid var(--border-2) !important;
-  border-radius: var(--radius-xs) !important;
-  font-family: var(--font-num) !important;
+  border-radius: var(--radius) !important;
+  font-family: var(--font-ui) !important;
   font-weight: 700 !important;
   font-size: 22px !important;
   text-align: center;
-  background: var(--surface) !important;
+  background: var(--bg) !important;
   color: var(--text) !important;
   text-align-last: center;
   -moz-text-align-last: center;
@@ -485,89 +502,97 @@ button.danger:hover { background: #fecaca; }
   transition: all 0.15s;
 }
 .goals-select:hover:not(:disabled) {
-  border-color: var(--gold-2) !important;
+  border-color: var(--fifa-navy) !important;
 }
 .goals-select:focus {
   outline: none;
-  border-color: var(--gold-2) !important;
-  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.15);
+  border-color: var(--fifa-navy) !important;
+  box-shadow: 0 0 0 3px rgba(31, 67, 128, 0.15);
 }
 .goals-select:disabled {
-  background: rgba(255, 255, 255, 0.5) !important;
-  color: var(--text-2) !important;
-  cursor: not-allowed;
+  background: var(--bg-2) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  cursor: default;
+  opacity: 1;
 }
 
 .vs {
-  font-family: var(--font-num);
-  font-size: 14px;
+  font-family: var(--font-ui);
+  font-size: 22px;
   font-weight: 700;
-  color: var(--muted);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  background: var(--surface);
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  display: grid; place-items: center;
-  border: 1px solid var(--border);
+  color: var(--text);
+  letter-spacing: 0;
+  padding: 0 4px;
+  font-variant-numeric: tabular-nums;
 }
 
+/* Botón guardar — pequeño, abajo a la derecha */
 .match-form > button.primary {
-  margin-top: 0;
-  grid-column: 4;
-  padding: 10px 16px;
-  font-size: 13px;
+  margin: 0;
+  grid-column: 1 / -1;
+  justify-self: end;
+  padding: 8px 18px;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .match.locked .match-form {
   grid-template-columns: 1fr auto 1fr;
 }
 
+/* Resultado debajo */
 .result {
   grid-column: 1 / -1;
-  margin-top: 14px;
-  padding: 14px 16px;
-  background: var(--surface);
-  border-radius: var(--radius-xs);
-  font-size: 14px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
   color: var(--text-2);
-  border: 1px solid rgba(124, 58, 237, 0.15);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 .result b {
-  font-family: var(--font-num);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
   color: var(--text);
 }
 
-.points {
+.result .points {
   display: inline-flex;
   align-items: center;
-  background: linear-gradient(135deg, var(--green) 0%, #166534 100%);
+  background: var(--green);
   color: #fff;
-  padding: 4px 12px;
-  border-radius: 999px;
+  padding: 3px 9px;
+  border-radius: 3px;
   font-weight: 700;
-  font-size: 12.5px;
-  letter-spacing: 0.02em;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   margin-left: auto;
+}
+
+/* ─────────── Ver grupos link ─────────── */
+.round h2 .view-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fifa-navy);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 /* ─────────── Ranking ─────────── */
 table.ranking {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--surface);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  border-collapse: collapse;
+  background: var(--bg);
   border: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 table.ranking th,
 table.ranking td {
@@ -576,12 +601,12 @@ table.ranking td {
   font-size: 14px;
 }
 table.ranking th {
-  background: var(--surface-soft);
+  background: var(--bg-2);
   color: var(--muted);
   font-weight: 600;
-  font-size: 11.5px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   border-bottom: 1px solid var(--border);
 }
 table.ranking td {
@@ -589,47 +614,35 @@ table.ranking td {
   color: var(--text-2);
 }
 table.ranking tr:last-child td { border-bottom: none; }
-table.ranking tr:hover td { background: var(--surface-soft); }
+table.ranking tr:hover td { background: var(--row-hover); }
 
 table.ranking .pos {
-  font-family: var(--font-num);
   font-weight: 700;
   font-size: 16px;
   width: 56px;
-}
-table.ranking .points {
-  display: inline-block;
-  font-family: var(--font-num);
-  font-weight: 700;
-  background: none;
   color: var(--text);
-  padding: 0;
+}
+table.ranking .points b {
+  font-weight: 700;
   font-size: 18px;
-  margin: 0;
-  border-radius: 0;
+  color: var(--text);
+  background: transparent;
+  padding: 0;
 }
-table.ranking td:nth-child(2) { font-weight: 600; color: var(--text); font-size: 15px; }
+table.ranking td:nth-child(2) {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 15px;
+}
 
-table.ranking tr.rank-1 {
-  background: linear-gradient(90deg, var(--gold-soft-1) 0%, transparent 100%);
-}
-table.ranking tr.rank-1 td:nth-child(2) { color: #78350f; }
-table.ranking tr.rank-1 .points { color: #b45309; font-size: 22px; }
-table.ranking tr.rank-1 .pos    { font-size: 22px; }
+table.ranking tr.rank-1 td { background: #FEFCE8; }
+table.ranking tr.rank-1 .points b { color: var(--gold); font-size: 20px; }
 
-table.ranking tr.rank-2 {
-  background: linear-gradient(90deg, #e7e5e4 0%, transparent 100%);
-}
-table.ranking tr.rank-2 .pos { font-size: 20px; }
-
-table.ranking tr.rank-3 {
-  background: linear-gradient(90deg, var(--orange-soft) 0%, transparent 100%);
-}
-table.ranking tr.rank-3 td:nth-child(2) { color: var(--orange); }
-table.ranking tr.rank-3 .pos { font-size: 20px; }
+table.ranking tr.rank-2 td { background: #F8FAFC; }
+table.ranking tr.rank-3 td { background: #FFF7ED; }
 
 table.ranking tr.winner td {
-  background: linear-gradient(90deg, var(--gold-soft-1) 0%, transparent 100%);
+  background: #FEFCE8;
   font-weight: 600;
 }
 
@@ -637,93 +650,79 @@ table.ranking tr.winner td {
   text-align: center;
   color: var(--muted);
   padding: 32px !important;
-  font-style: italic;
   font-size: 14px;
 }
 
 .small {
   font-size: 13px;
   color: var(--muted);
-  margin-top: 16px;
+  margin-top: 20px;
   text-align: center;
 }
-.small a { font-weight: 600; }
+.small a {
+  font-weight: 600;
+  color: var(--fifa-navy);
+}
 
 /* ─────────── Footer ─────────── */
 .footer {
   text-align: center;
   padding: 32px 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   border-top: 1px solid var(--border);
   margin-top: 64px;
-  background: var(--bg-2);
+  background: var(--bg);
 }
-.footer a { color: var(--text-2); font-weight: 600; }
-
-/* ─────────── Animations ─────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+.footer a {
+  color: var(--fifa-navy);
+  font-weight: 600;
 }
-.card, .round, .match, .flash { animation: fadeUp 0.35s ease-out; }
 
 /* ─────────── Responsive ─────────── */
 @media (max-width: 768px) {
-  h1 { font-size: 28px; }
-  h2 { font-size: 18px; }
-  main { padding: 20px 0 48px; }
+  h1 { font-size: 24px; }
+  main { padding: 24px 0 56px; }
 
-  .topbar { padding: 10px 0; }
-  .topbar nav { gap: 4px; }
-  .topbar nav a { padding: 6px 10px; font-size: 13px; }
-  .user { padding: 4px 10px; font-size: 12px; }
+  .topbar::before { height: 48px; }
+  .topbar nav { gap: 0; }
+  .topbar nav a { padding: 16px 10px; font-size: 11px; }
+  .brand-text { font-size: 12px; }
+  .brand-mark { width: 32px; height: 32px; }
+  .brand-mark::before { font-size: 18px; }
 
-  .card { padding: 20px; }
-  .card.narrow { padding: 24px; margin: 24px auto; }
-  .round { padding: 18px 20px 22px; }
-  .match { padding: 14px 16px; }
+  .card { padding: 24px; }
+  .card.narrow { padding: 28px; margin: 28px auto; }
+  .match { padding: 18px 14px; }
 
   .match-form {
     grid-template-columns: 1fr auto 1fr;
-    gap: 10px;
+    gap: 12px;
   }
   .match-form > button.primary {
     grid-column: 1 / -1;
-    margin-top: 12px;
+    justify-self: stretch;
     width: 100%;
-    justify-content: center;
+    margin-top: 8px;
   }
-  .match-form .team {
-    gap: 8px;
-  }
-  .match-form .team-name {
-    font-size: 13px;
-    min-width: 0;
-  }
+  .match-form .team { gap: 10px; }
+  .match-form .team-name { font-size: 13px; min-width: 0; }
   .match-form .flag { font-size: 22px; }
   .goals-select {
     width: 48px !important;
     height: 48px !important;
     font-size: 18px !important;
   }
-  .vs { width: 30px; height: 30px; font-size: 12px; }
+  .vs { font-size: 18px; }
 
   table.ranking th,
-  table.ranking td {
-    padding: 10px 8px;
-    font-size: 13px;
-  }
-  table.ranking .pos { width: 36px; }
+  table.ranking td { padding: 10px 8px; font-size: 13px; }
+  table.ranking .pos { width: 36px; font-size: 14px; }
 }
 
 @media (max-width: 480px) {
-  .brand { font-size: 14px; }
-  .topbar .brand-text { font-size: 14px; }
-  h1 { font-size: 24px; }
+  .brand-text { font-size: 10px; letter-spacing: 0.08em; }
+  h1 { font-size: 20px; }
   .match-form .team-name { font-size: 12px; }
-  .match-meta { font-size: 11px; }
-  .match-meta .date,
-  .match-meta .ground,
-  .match-meta .group { padding: 3px 8px; }
+  .match-meta { font-size: 11px; gap: 4px; }
 }
