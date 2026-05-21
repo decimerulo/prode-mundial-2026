@@ -246,31 +246,10 @@ app.post('/predict/:id', requireLogin, (req, res) => {
   res.redirect('/matches');
 });
 
-// ----- Ranking por ronda -----
+// ----- Ranking -----
 app.get('/ranking', requireLogin, (req, res) => {
-  // Por ronda: suma de puntos por usuario en partidos finalizados de esa ronda
-  const rows = db.prepare(`
-    SELECT m.round AS round, u.nickname AS nickname,
-           SUM(p.points) AS points,
-           COUNT(p.id) AS preds,
-           SUM(CASE WHEN p.points = 5 THEN 1 ELSE 0 END) AS exactos,
-           SUM(CASE WHEN p.points = 2 THEN 1 ELSE 0 END) AS ganadores
-    FROM predictions p
-    JOIN users u ON u.id = p.user_id
-    JOIN matches m ON m.id = p.match_id
-    WHERE m.finished = 1
-    GROUP BY m.round, u.id
-    ORDER BY m.round ASC, points DESC, u.nickname ASC
-  `).all();
 
-  // Mejor pronosticador de cada ronda
-  const byRound = new Map();
-  for (const r of rows) {
-    if (!byRound.has(r.round)) byRound.set(r.round, []);
-    byRound.get(r.round).push(r);
-  }
-
-  // Ranking general
+  // ── Ranking general (todos los partidos finalizados) ──────────
   const general = db.prepare(`
     SELECT u.nickname,
            COALESCE(SUM(p.points), 0) AS points,
@@ -285,7 +264,55 @@ app.get('/ranking', requireLogin, (req, res) => {
     ORDER BY points DESC, exactos DESC, u.nickname ASC
   `).all();
 
-  res.render('ranking', { byRound: Array.from(byRound.entries()), general });
+  // ── Checkpoints de jornada (fase de grupos) ───────────────────
+  // Cada grupo tiene 6 partidos: los primeros 2 = Jornada 1, siguientes 2 = J2, últimos 2 = J3
+  // Jornada completa = todos sus 24 partidos (12 grupos × 2 partidos) finalizados
+  const groupMatchesRaw = db.prepare(`
+    SELECT id, grp, match_date, match_time, finished
+    FROM matches
+    WHERE grp IS NOT NULL
+    ORDER BY grp, match_date, match_time, id
+  `).all();
+
+  // Asignar jornada a cada partido según su posición dentro del grupo
+  const jornadaOf = {};
+  const groupCount = {};
+  for (const m of groupMatchesRaw) {
+    groupCount[m.grp] = (groupCount[m.grp] || 0) + 1;
+    const idx = groupCount[m.grp];
+    jornadaOf[m.id] = idx <= 2 ? 1 : idx <= 4 ? 2 : 3;
+  }
+  const finishedById = Object.fromEntries(groupMatchesRaw.map(m => [m.id, m.finished === 1]));
+
+  // Checkpoints: mostrar ranking acumulado al cierre de cada jornada completa
+  const jornadaCheckpoints = [];
+  let cumulativeIds = [];
+  for (const jornada of [1, 2, 3]) {
+    const jornadaIds = Object.entries(jornadaOf)
+      .filter(([, j]) => j === jornada)
+      .map(([id]) => +id);
+    cumulativeIds = [...cumulativeIds, ...jornadaIds];
+
+    const complete = jornadaIds.every(id => finishedById[id]);
+    if (!complete) break; // si esta jornada no terminó, las siguientes tampoco
+
+    const ph = cumulativeIds.map(() => '?').join(',');
+    const ranking = db.prepare(`
+      SELECT u.nickname,
+             COALESCE(SUM(p.points), 0) AS points,
+             SUM(CASE WHEN p.points = 5 THEN 1 ELSE 0 END) AS exactos,
+             SUM(CASE WHEN p.points = 2 THEN 1 ELSE 0 END) AS ganadores
+      FROM users u
+      LEFT JOIN predictions p ON p.user_id = u.id AND p.match_id IN (${ph})
+      WHERE u.is_admin = 0
+      GROUP BY u.id
+      ORDER BY points DESC, exactos DESC, u.nickname ASC
+    `).all(...cumulativeIds);
+
+    jornadaCheckpoints.push({ jornada, ranking });
+  }
+
+  res.render('ranking', { general, jornadaCheckpoints });
 });
 
 // ----- Panel admin -----

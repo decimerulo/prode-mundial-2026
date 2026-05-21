@@ -9,41 +9,56 @@
       <tr><td colspan="6" class="empty">Todavía no hay datos.</td></tr>
     <% } %>
     <% general.forEach(function(r,i){
-      const medals = ['🥇', '🥈', '🥉'];
+      const medals = ['🥇','🥈','🥉'];
       const medal = medals[i] || (i+1);
     %>
-      <tr class="<%= i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '' %>">
+      <tr class="<%= i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'' %>">
         <td class="pos"><%= medal %></td>
         <td><strong><%= r.nickname %></strong></td>
-        <td class="points"><b><%= r.points || 0 %></b></td>
-        <td><%= r.exactos || 0 %></td>
-        <td><%= r.ganadores || 0 %></td>
-        <td><%= r.preds || 0 %></td>
+        <td class="points"><b><%= r.points||0 %></b></td>
+        <td><%= r.exactos||0 %></td>
+        <td><%= r.ganadores||0 %></td>
+        <td><%= r.preds||0 %></td>
       </tr>
     <% }); %>
   </tbody>
 </table>
 
-<h1>Ganadores por ronda</h1>
-<% if (byRound.length === 0) { %>
-  <div class="card"><p>Aún no hay rondas finalizadas.</p></div>
+<%# ── Checkpoints de jornada ─────────────────────────────────── %>
+<% if (jornadaCheckpoints.length > 0) { %>
+  <h1>Checkpoints — Fase de Grupos</h1>
+  <p class="small" style="margin-top:-1rem;margin-bottom:1.5rem">Ranking acumulado al cierre de cada jornada</p>
+
+  <% jornadaCheckpoints.forEach(function(cp){ %>
+    <section class="round">
+      <h2>
+        Jornada <%= cp.jornada %>
+        <% if (cp.ranking.length > 0 && cp.ranking[0].points > 0) { %>
+          <span style="font-size:.9rem;font-weight:500;color:var(--muted);margin-left:.8rem">
+            Líder: 🥇 <b><%= cp.ranking[0].nickname %></b> · <%= cp.ranking[0].points %> pts
+          </span>
+        <% } %>
+      </h2>
+      <table class="ranking">
+        <thead>
+          <tr><th>#</th><th>Jugador</th><th>Puntos</th><th>Exactos</th><th>Ganadores</th></tr>
+        </thead>
+        <tbody>
+          <% if (cp.ranking.length === 0) { %>
+            <tr><td colspan="5" class="empty">Sin datos.</td></tr>
+          <% } %>
+          <% cp.ranking.forEach(function(r,i){ %>
+            <tr class="<%= i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'' %>">
+              <td class="pos"><%= ['🥇','🥈','🥉'][i] || i+1 %></td>
+              <td><%= r.nickname %></td>
+              <td><b><%= r.points %></b></td>
+              <td><%= r.exactos %></td>
+              <td><%= r.ganadores %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </section>
+  <% }); %>
 <% } %>
-<% byRound.forEach(function(entry){
-     const round = entry[0]; const rows = entry[1]; %>
-  <section class="round">
-    <h2><%= round %></h2>
-    <table class="ranking">
-      <thead><tr><th>#</th><th>Jugador</th><th>Puntos</th><th>Exactos</th><th>Ganadores</th></tr></thead>
-      <tbody>
-        <% rows.forEach(function(r,i){ %>
-          <tr class="<%= i === 0 ? 'winner' : '' %>">
-            <td><%= i+1 %></td><td><%= r.nickname %></td>
-            <td><b><%= r.points %></b></td>
-            <td><%= r.exactos %></td><td><%= r.ganadores %></td>
-          </tr>
-        <% }); %>
-      </tbody>
-    </table>
-  </section>
-<% }); %>
 <%- include('partials/foot') %>
