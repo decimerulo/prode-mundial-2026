@@ -352,7 +352,7 @@ app.get('/ranking', requireLogin, (req, res) => {
     FROM users u
     LEFT JOIN predictions p ON p.user_id = u.id
     LEFT JOIN matches m ON m.id = p.match_id AND m.finished = 1
-    WHERE u.is_admin = 0
+    WHERE 1=1
     GROUP BY u.id
     ORDER BY points DESC, exactos DESC, u.nickname ASC
   `).all();
@@ -397,7 +397,7 @@ app.get('/ranking', requireLogin, (req, res) => {
              SUM(CASE WHEN p.points = 2 THEN 1 ELSE 0 END) AS ganadores
       FROM users u
       LEFT JOIN predictions p ON p.user_id = u.id AND p.match_id IN (${ph})
-      WHERE u.is_admin = 0
+      WHERE 1=1
       GROUP BY u.id
       ORDER BY points DESC, exactos DESC, u.nickname ASC
     `).all(...cumulativeIds);
@@ -709,7 +709,7 @@ app.get('/betting/ranking', requireLogin, (req, res) => {
       (SELECT COUNT(*) FROM bets b WHERE b.user_id=u.id AND b.result='outcome') AS outcome_hits,
       (SELECT COUNT(*) FROM bets b WHERE b.user_id=u.id AND b.result='miss')    AS misses
     FROM users u
-    WHERE u.is_admin = 0
+    WHERE 1=1
     ORDER BY u.balance DESC, total_won DESC
   `).all();
   res.render('betting-ranking', { ranking });
