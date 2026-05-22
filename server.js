@@ -101,6 +101,95 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// ──────────────────────────────────────────────────────────────
+// HELPERS DE APUESTAS
+// ──────────────────────────────────────────────────────────────
+
+// Construye un Map matchId → jornada label
+function buildJornadaMap() {
+  const map = new Map();
+  const groupMs = db.prepare(`
+    SELECT id, grp FROM matches WHERE grp IS NOT NULL
+    ORDER BY grp, match_date, match_time, id
+  `).all();
+  const cnt = {};
+  for (const m of groupMs) {
+    cnt[m.grp] = (cnt[m.grp] || 0) + 1;
+    const idx = cnt[m.grp];
+    map.set(m.id, `Jornada ${idx <= 2 ? 1 : idx <= 4 ? 2 : 3}`);
+  }
+  db.prepare(`SELECT id, round FROM matches WHERE grp IS NULL`).all()
+    .forEach(m => map.set(m.id, m.round));
+  return map;
+}
+
+// Liquida las apuestas de un partido cuando tiene resultado
+// Distribución: 70% del pozo de perdedores → exactos, 30% → outcome correcto
+// Si no hay exactos: 100% → outcome correcto
+// Si no hay ningún ganador: devuelve las apuestas
+function settleBets(matchId) {
+  const match = db.prepare('SELECT * FROM matches WHERE id = ?').get(matchId);
+  if (!match || !match.finished) return;
+
+  const pending = db.prepare(
+    'SELECT * FROM bets WHERE match_id = ? AND settled = 0'
+  ).all(matchId);
+  if (pending.length === 0) return;
+
+  const actualOutcome = match.goals1 > match.goals2 ? 'local'
+    : match.goals1 < match.goals2 ? 'visitante' : 'empate';
+
+  const classified = pending.map(b => {
+    const bOut = b.pred_goals1 > b.pred_goals2 ? 'local'
+      : b.pred_goals1 < b.pred_goals2 ? 'visitante' : 'empate';
+    const exact = b.pred_goals1 === match.goals1 && b.pred_goals2 === match.goals2;
+    return { ...b, result: exact ? 'exact' : bOut === actualOutcome ? 'outcome' : 'miss' };
+  });
+
+  const missers        = classified.filter(b => b.result === 'miss');
+  const exactWinners   = classified.filter(b => b.result === 'exact');
+  const outcomeWinners = classified.filter(b => b.result === 'outcome');
+  const missPool       = missers.reduce((s, b) => s + b.amount, 0);
+  const noWinners      = exactWinners.length === 0 && outcomeWinners.length === 0;
+
+  const exactShare   = exactWinners.length > 0 ? 0.70 : 0;
+  const outcomeShare = exactWinners.length > 0 ? 0.30 : 1.00;
+  const exactPool    = missPool * exactShare;
+  const outcomePool  = missPool * outcomeShare;
+  const exactTotal   = exactWinners.reduce((s, b) => s + b.amount, 0);
+  const outcomeTotal = outcomeWinners.reduce((s, b) => s + b.amount, 0);
+
+  const updBet     = db.prepare('UPDATE bets SET result=?, payout=?, settled=1, updated_at=CURRENT_TIMESTAMP WHERE id=?');
+  const updBalance = db.prepare('UPDATE users SET balance = balance + ? WHERE id=?');
+
+  db.runInTx(() => {
+    if (noWinners) {
+      // Devolver apuestas a todos
+      for (const b of pending) {
+        updBet.run('miss', b.amount, b.id);
+        updBalance.run(b.amount, b.user_id);
+      }
+      return;
+    }
+    for (const b of exactWinners) {
+      const prize  = exactTotal   > 0 ? exactPool   * (b.amount / exactTotal)   : 0;
+      const payout = Math.round((b.amount + prize) * 100) / 100;
+      updBet.run('exact', payout, b.id);
+      updBalance.run(payout, b.user_id);
+    }
+    for (const b of outcomeWinners) {
+      const prize  = outcomeTotal > 0 ? outcomePool * (b.amount / outcomeTotal) : 0;
+      const payout = Math.round((b.amount + prize) * 100) / 100;
+      updBet.run('outcome', payout, b.id);
+      updBalance.run(payout, b.user_id);
+    }
+    for (const b of missers) {
+      updBet.run('miss', 0, b.id);
+    }
+  });
+  console.log(`[bets] Partido ${matchId} liquidado — exactos:${exactWinners.length} outcome:${outcomeWinners.length} miss:${missers.length} pozo:${missPool.toFixed(2)}`);
+}
+
 // -------- Cálculo de puntos --------
 // 5 puntos si acierta el resultado exacto
 // 2 puntos si solo acierta el ganador (o el empate)
@@ -354,7 +443,8 @@ app.post('/admin/result/:id', requireLogin, requireAdmin, (req, res) => {
   }
   db.prepare('UPDATE matches SET goals1 = ?, goals2 = ?, finished = 1 WHERE id = ?').run(g1, g2, matchId);
   recalcMatchPoints(matchId);
-  req.session.flash = { type: 'success', msg: 'Resultado guardado y puntos calculados.' };
+  settleBets(matchId);
+  req.session.flash = { type: 'success', msg: 'Resultado guardado y puntos/apuestas calculados.' };
   res.redirect('/admin');
 });
 
@@ -428,6 +518,7 @@ async function syncResults() {
 
       db.prepare('UPDATE matches SET goals1=?, goals2=?, finished=1 WHERE id=?').run(g1, g2, row.id);
       recalcMatchPoints(row.id);
+      settleBets(row.id);
       updated++;
     }
 
@@ -456,6 +547,168 @@ app.post('/admin/sync', requireLogin, requireAdmin, async (req, res) => {
     req.session.flash = { type: 'error', msg: `Error en sync: ${r.error}` };
   }
   res.redirect('/admin');
+});
+
+// =========================================
+// APUESTAS
+// =========================================
+
+// Helper: jornada activa = primera jornada con al menos un partido no bloqueado
+function getActiveJornada(jornadaMap) {
+  const matches = db.prepare(
+    'SELECT * FROM matches ORDER BY match_date, match_time, id'
+  ).all();
+  for (const m of matches) {
+    if (!isMatchLocked(m)) return jornadaMap.get(m.id) || m.round;
+  }
+  // Todas bloqueadas → primera con algún partido sin resultado
+  for (const m of matches) {
+    if (!m.finished) return jornadaMap.get(m.id) || m.round;
+  }
+  return matches.length ? jornadaMap.get(matches[matches.length - 1].id) : null;
+}
+
+// GET /betting — vista principal de apuestas
+app.get('/betting', requireLogin, (req, res) => {
+  const uid      = req.session.user.id;
+  const jMap     = buildJornadaMap();
+  const jornada  = req.query.jornada || getActiveJornada(jMap);
+  if (!jornada) {
+    return res.render('betting', { currentJornada: null, matches: [], balance: 0, jornadaDeposit: 0, jornadaBet: 0, allJornadas: [] });
+  }
+
+  // Lista de todas las jornadas disponibles para el selector
+  const allJornadas = [...new Set([...jMap.values()])];
+
+  // Partidos de esta jornada
+  const jornadaMatches = db.prepare(
+    'SELECT * FROM matches ORDER BY match_date, match_time, id'
+  ).all()
+    .filter(m => (jMap.get(m.id) || m.round) === jornada)
+    .map(m => ({
+      ...m,
+      locked:       isMatchLocked(m),
+      matchTimeART: formatMatchTimeART(m),
+      jornada:      jMap.get(m.id) || m.round,
+    }));
+
+  const mIds = jornadaMatches.map(m => m.id);
+  const ph   = mIds.map(() => '?').join(',');
+
+  // Bets del usuario en esta jornada
+  const userBets = mIds.length
+    ? db.prepare(`SELECT * FROM bets WHERE user_id = ? AND match_id IN (${ph})`).all(uid, ...mIds)
+    : [];
+  const betByMatch = Object.fromEntries(userBets.map(b => [b.match_id, b]));
+
+  // Pozo por partido (todos los usuarios)
+  const pools = mIds.length
+    ? db.prepare(`
+        SELECT match_id,
+          COUNT(*)  AS betters,
+          SUM(amount) AS total,
+          SUM(CASE WHEN pred_goals1 > pred_goals2 THEN amount ELSE 0 END) AS local_pool,
+          SUM(CASE WHEN pred_goals1 = pred_goals2 THEN amount ELSE 0 END) AS empate_pool,
+          SUM(CASE WHEN pred_goals1 < pred_goals2 THEN amount ELSE 0 END) AS visitante_pool
+        FROM bets WHERE match_id IN (${ph})
+        GROUP BY match_id
+      `).all(...mIds)
+    : [];
+  const poolByMatch = Object.fromEntries(pools.map(p => [p.match_id, p]));
+
+  jornadaMatches.forEach(m => {
+    m.myBet = betByMatch[m.id] || null;
+    m.pool  = poolByMatch[m.id] || { betters: 0, total: 0, local_pool: 0, empate_pool: 0, visitante_pool: 0 };
+  });
+
+  const user          = db.prepare('SELECT balance FROM users WHERE id = ?').get(uid);
+  const jornadaDeposit = db.prepare('SELECT COALESCE(SUM(amount),0) AS t FROM jornada_deposits WHERE user_id=? AND jornada=?').get(uid, jornada).t;
+  const jornadaBet     = db.prepare('SELECT COALESCE(SUM(amount),0) AS t FROM bets WHERE user_id=? AND jornada=? AND settled=0').get(uid, jornada).t;
+
+  res.render('betting', { currentJornada: jornada, matches: jornadaMatches, balance: user.balance, jornadaDeposit, jornadaBet, allJornadas });
+});
+
+// POST /betting/deposit
+app.post('/betting/deposit', requireLogin, (req, res) => {
+  const uid     = req.session.user.id;
+  const amount  = parseFloat(req.body.amount);
+  const jornada = (req.body.jornada || '').trim();
+  if (!amount || amount <= 0 || isNaN(amount)) {
+    req.session.flash = { type: 'error', msg: 'Monto inválido.' };
+    return res.redirect('/betting' + (jornada ? `?jornada=${encodeURIComponent(jornada)}` : ''));
+  }
+  db.runInTx(() => {
+    db.prepare('INSERT INTO jornada_deposits (user_id, jornada, amount) VALUES (?,?,?)').run(uid, jornada, amount);
+    db.prepare('UPDATE users SET balance = balance + ? WHERE id=?').run(amount, uid);
+  });
+  req.session.flash = { type: 'success', msg: `$${amount.toFixed(2)} agregados para ${jornada}.` };
+  res.redirect('/betting?jornada=' + encodeURIComponent(jornada));
+});
+
+// POST /betting/bet/:matchId
+app.post('/betting/bet/:matchId', requireLogin, (req, res) => {
+  const uid     = req.session.user.id;
+  const matchId = parseInt(req.params.matchId, 10);
+  const amount  = parseFloat(req.body.amount);
+  const g1      = parseInt(req.body.goals1, 10);
+  const g2      = parseInt(req.body.goals2, 10);
+
+  if (isNaN(g1) || isNaN(g2) || g1 < 0 || g2 < 0 || g1 > 20 || g2 > 20) {
+    req.session.flash = { type: 'error', msg: 'Marcador inválido.' };
+    return res.redirect('/betting');
+  }
+  if (isNaN(amount) || amount <= 0) {
+    req.session.flash = { type: 'error', msg: 'Monto inválido.' };
+    return res.redirect('/betting');
+  }
+
+  const match = db.prepare('SELECT * FROM matches WHERE id = ?').get(matchId);
+  if (!match) { req.session.flash = { type: 'error', msg: 'Partido no encontrado.' }; return res.redirect('/betting'); }
+  if (isMatchLocked(match)) { req.session.flash = { type: 'error', msg: 'El partido ya cerró para apuestas.' }; return res.redirect('/betting'); }
+
+  const jMap    = buildJornadaMap();
+  const jornada = jMap.get(matchId) || match.round;
+
+  const user     = db.prepare('SELECT balance FROM users WHERE id=?').get(uid);
+  const existing = db.prepare('SELECT amount FROM bets WHERE user_id=? AND match_id=?').get(uid, matchId);
+  const prevAmt  = existing ? existing.amount : 0;
+  const diff     = amount - prevAmt; // cuánto más se descuenta (puede ser negativo si baja la apuesta)
+
+  if (diff > 0 && user.balance < diff) {
+    req.session.flash = { type: 'error', msg: `Saldo insuficiente ($${user.balance.toFixed(2)} disponible).` };
+    return res.redirect('/betting?jornada=' + encodeURIComponent(jornada));
+  }
+
+  db.runInTx(() => {
+    db.prepare(`
+      INSERT INTO bets (user_id, match_id, jornada, amount, pred_goals1, pred_goals2)
+      VALUES (?,?,?,?,?,?)
+      ON CONFLICT(user_id, match_id) DO UPDATE SET
+        amount=excluded.amount, pred_goals1=excluded.pred_goals1,
+        pred_goals2=excluded.pred_goals2, updated_at=CURRENT_TIMESTAMP
+    `).run(uid, matchId, jornada, amount, g1, g2);
+    db.prepare('UPDATE users SET balance = balance - ? WHERE id=?').run(diff, uid);
+  });
+
+  req.session.flash = { type: 'success', msg: `Apuesta guardada: ${match.team1} ${g1}-${g2} ${match.team2} · $${amount.toFixed(2)}` };
+  res.redirect('/betting?jornada=' + encodeURIComponent(jornada));
+});
+
+// GET /betting/ranking
+app.get('/betting/ranking', requireLogin, (req, res) => {
+  const ranking = db.prepare(`
+    SELECT u.nickname, u.balance,
+      COALESCE((SELECT SUM(d.amount) FROM jornada_deposits d WHERE d.user_id=u.id), 0) AS deposited,
+      COALESCE((SELECT SUM(b.payout) FROM bets b WHERE b.user_id=u.id AND b.settled=1), 0) AS total_won,
+      COALESCE((SELECT SUM(b.amount) FROM bets b WHERE b.user_id=u.id AND b.settled=1), 0) AS total_wagered,
+      (SELECT COUNT(*) FROM bets b WHERE b.user_id=u.id AND b.result='exact')   AS exact_hits,
+      (SELECT COUNT(*) FROM bets b WHERE b.user_id=u.id AND b.result='outcome') AS outcome_hits,
+      (SELECT COUNT(*) FROM bets b WHERE b.user_id=u.id AND b.result='miss')    AS misses
+    FROM users u
+    WHERE u.is_admin = 0
+    ORDER BY u.balance DESC, total_won DESC
+  `).all();
+  res.render('betting-ranking', { ranking });
 });
 
 // 404

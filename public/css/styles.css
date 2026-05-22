@@ -689,6 +689,114 @@ table.ranking tr.winner td {
   font-weight: 600;
 }
 
+/* ─────────── Apuestas ─────────── */
+.jornada-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+.jornada-tab {
+  padding: .4rem .9rem;
+  border-radius: 999px;
+  border: 2px solid var(--fifa-navy, #1F4380);
+  color: var(--fifa-navy, #1F4380);
+  font-size: .85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all .2s;
+}
+.jornada-tab.active, .jornada-tab:hover {
+  background: var(--fifa-navy, #1F4380);
+  color: #fff;
+}
+
+.bet-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  background: var(--bg-2, #f4f4f4);
+  border-radius: 14px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid rgba(31,67,128,.12);
+}
+.bet-stat { display: flex; flex-direction: column; min-width: 130px; }
+.bet-stat-label { font-size: .8rem; color: var(--muted); font-weight: 500; }
+.bet-stat-value { font-size: 1.3rem; font-weight: 800; color: var(--text); }
+
+.deposit-form { display: flex; gap: .5rem; align-items: center; margin-left: auto; flex-wrap: wrap; }
+.deposit-input {
+  width: 140px;
+  padding: .55rem .8rem;
+  border: 2px solid var(--border, #e5e7eb);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.bet-match { margin-bottom: 1.2rem; }
+
+.pool-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: .6rem 0 .3rem;
+  font-size: .75rem;
+  font-weight: 700;
+}
+.pool-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0 6px;
+  transition: width .3s;
+}
+.pool-local     { background: #1F4380; color: #fff; }
+.pool-empate    { background: #f59e0b; color: #000; }
+.pool-visitante { background: #ef4444; color: #fff; }
+
+.pool-total {
+  font-size: .82rem;
+  color: var(--muted);
+  margin: 0 0 .6rem;
+  font-weight: 500;
+}
+
+.bet-row {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: .8rem;
+  width: 100%;
+}
+.bet-amount-input {
+  width: 120px;
+  padding: .55rem .8rem;
+  border: 2px solid var(--fifa-navy, #1F4380);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+}
+.goals-static {
+  width: 50px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2, #f4f4f4);
+  border: 2px solid var(--border, #e5e7eb);
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
 /* ─────────── Responsive ─────────── */
 @media (max-width: 768px) {
   h1 { font-size: 24px; }

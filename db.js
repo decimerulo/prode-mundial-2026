@@ -53,7 +53,40 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_pred_user ON predictions(user_id);
   CREATE INDEX IF NOT EXISTS idx_pred_match ON predictions(match_id);
   CREATE INDEX IF NOT EXISTS idx_match_round ON matches(round);
+
+  CREATE TABLE IF NOT EXISTS jornada_deposits (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    jornada    TEXT    NOT NULL,
+    amount     REAL    NOT NULL CHECK(amount > 0),
+    created_at TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS bets (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL,
+    match_id    INTEGER NOT NULL,
+    jornada     TEXT    NOT NULL,
+    amount      REAL    NOT NULL CHECK(amount > 0),
+    pred_goals1 INTEGER NOT NULL,
+    pred_goals2 INTEGER NOT NULL,
+    result      TEXT,            -- 'exact' | 'outcome' | 'miss' | NULL
+    payout      REAL    NOT NULL DEFAULT 0,
+    settled     INTEGER NOT NULL DEFAULT 0,
+    created_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, match_id),
+    FOREIGN KEY (user_id)  REFERENCES users(id)   ON DELETE CASCADE,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_bets_user  ON bets(user_id);
+  CREATE INDEX IF NOT EXISTS idx_bets_match ON bets(match_id);
 `);
+
+// Agrega columna balance a users si no existe (migración segura)
+try { db.exec('ALTER TABLE users ADD COLUMN balance REAL NOT NULL DEFAULT 0'); } catch (_) {}
 
 // Helper para transacciones (node:sqlite no tiene db.transaction)
 db.runInTx = function (fn) {

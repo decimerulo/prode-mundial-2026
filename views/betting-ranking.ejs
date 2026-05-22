@@ -1,0 +1,46 @@
+<%- include('partials/head', { title: 'Ranking Apuestas' }) %>
+<h1>💰 Ranking de Apuestas</h1>
+
+<table class="ranking">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Jugador</th>
+      <th>Saldo</th>
+      <th>Depositado</th>
+      <th>Ganancia neta</th>
+      <th>🎯 Exactos</th>
+      <th>✅ Outcome</th>
+      <th>❌ Errados</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (ranking.length === 0) { %>
+      <tr><td colspan="8" class="empty">Todavía no hay apuestas.</td></tr>
+    <% } %>
+    <% ranking.forEach(function(r, i) {
+      const net = r.balance - r.deposited;
+      const medals = ['🥇','🥈','🥉'];
+    %>
+      <tr class="<%= i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'' %>">
+        <td class="pos"><%= medals[i] || i+1 %></td>
+        <td><strong><%= r.nickname %></strong></td>
+        <td><b>$<%= r.balance.toFixed(2) %></b></td>
+        <td>$<%= r.deposited.toFixed(2) %></td>
+        <td style="color:<%= net>=0?'#10b981':'#ef4444' %>">
+          <b><%= net>=0?'+':'' %><%= net.toFixed(2) %></b>
+        </td>
+        <td><%= r.exact_hits %></td>
+        <td><%= r.outcome_hits %></td>
+        <td><%= r.misses %></td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+
+<p style="text-align:center;margin-top:1rem">
+  <a href="/betting" class="secondary" style="padding:.5rem 1.2rem;border:2px solid var(--gold,#c89414);border-radius:8px;font-weight:600;color:var(--gold,#c89414);text-decoration:none">
+    ← Volver a mis apuestas
+  </a>
+</p>
+<%- include('partials/foot') %>

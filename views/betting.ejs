@@ -1,0 +1,145 @@
+<%- include('partials/head', { title: 'Apuestas' }) %>
+<h1>💰 Apuestas<% if (currentJornada) { %> — <%= currentJornada %><% } %></h1>
+
+<% if (!currentJornada) { %>
+  <div class="card"><p>No hay jornadas disponibles todavía.</p></div>
+  <%- include('partials/foot') %>
+<% } else { %>
+
+<%# ── Selector de jornada ── %>
+<div class="jornada-tabs">
+  <% allJornadas.forEach(function(j) { %>
+    <a href="/betting?jornada=<%= encodeURIComponent(j) %>"
+       class="jornada-tab <%= j === currentJornada ? 'active' : '' %>"><%= j %></a>
+  <% }); %>
+</div>
+
+<%# ── Barra de saldo ── %>
+<div class="bet-stats-bar">
+  <div class="bet-stat">
+    <span class="bet-stat-label">Saldo total</span>
+    <span class="bet-stat-value">$<%= balance.toFixed(2) %></span>
+  </div>
+  <div class="bet-stat">
+    <span class="bet-stat-label">Depósito esta jornada</span>
+    <span class="bet-stat-value">$<%= jornadaDeposit.toFixed(2) %></span>
+  </div>
+  <div class="bet-stat">
+    <span class="bet-stat-label">Apostado</span>
+    <span class="bet-stat-value">$<%= jornadaBet.toFixed(2) %></span>
+  </div>
+  <form method="post" action="/betting/deposit" class="deposit-form">
+    <input type="hidden" name="jornada" value="<%= currentJornada %>">
+    <input type="number" name="amount" placeholder="Agregar fondos" min="1" step="any" required class="deposit-input">
+    <button class="primary" type="submit">＋ Depositar</button>
+  </form>
+</div>
+
+<%# ── Regla del reparto ── %>
+<p class="legend">
+  🎯 <b>Resultado exacto</b>: se lleva el <b>70%</b> del pozo de perdedores ·
+  ✅ <b>Ganador correcto</b>: se lleva el <b>30%</b> ·
+  Si nadie acierta exacto, el ganador correcto se lleva el <b>100%</b>
+</p>
+
+<%# ── Lista de partidos ── %>
+<% if (matches.length === 0) { %>
+  <div class="card"><p>No hay partidos en esta jornada.</p></div>
+<% } %>
+
+<% matches.forEach(function(m) { %>
+  <div class="match bet-match <%= m.locked ? 'locked' : '' %>">
+
+    <%# Meta del partido %>
+    <div class="match-meta">
+      <span class="date">📅 <%= m.matchTimeART %></span>
+      <% if (m.grp) { %><span class="group">🏆 <%= m.grp %></span><% } %>
+      <% if (m.ground) { %><span class="ground">🏟️ <%= m.ground %></span><% } %>
+      <% if (m.locked && !m.finished) { %><span class="lock-badge">🔒 Cerrado</span><% } %>
+      <% if (m.finished) { %><span class="lock-badge" style="background:#10b981">✅ Finalizado</span><% } %>
+    </div>
+
+    <%# Barra del pozo %>
+    <% const p = m.pool; %>
+    <% if (p.total > 0) { %>
+      <% const lPct = (p.local_pool / p.total * 100).toFixed(0); %>
+      <% const ePct = (p.empate_pool / p.total * 100).toFixed(0); %>
+      <% const vPct = (p.visitante_pool / p.total * 100).toFixed(0); %>
+      <div class="pool-bar">
+        <% if (lPct > 0) { %><span class="pool-seg pool-local" style="width:<%= lPct %>%">Local $<%= p.local_pool.toFixed(0) %></span><% } %>
+        <% if (ePct > 0) { %><span class="pool-seg pool-empate" style="width:<%= ePct %>%">Empate $<%= p.empate_pool.toFixed(0) %></span><% } %>
+        <% if (vPct > 0) { %><span class="pool-seg pool-visitante" style="width:<%= vPct %>%">Visitante $<%= p.visitante_pool.toFixed(0) %></span><% } %>
+      </div>
+      <p class="pool-total">Pozo: <b>$<%= p.total.toFixed(2) %></b> · <%= p.betters %> apostador(es)</p>
+    <% } else { %>
+      <p class="pool-total">Aún sin apuestas en este partido</p>
+    <% } %>
+
+    <%# Formulario de apuesta (si no cerró) %>
+    <% if (!m.locked) { %>
+      <form method="post" action="/betting/bet/<%= m.id %>" class="match-form">
+        <div class="team team-left">
+          <span class="team-name"><%= m.team1 %></span>
+          <span class="flag"><%= getFlag(m.team1) %></span>
+          <select name="goals1" class="goals-select">
+            <% for (let i=0;i<=15;i++) { %>
+              <option value="<%= i %>" <%= (m.myBet && m.myBet.pred_goals1===i)?'selected':'' %>><%= i %></option>
+            <% } %>
+          </select>
+        </div>
+        <div class="vs">VS</div>
+        <div class="team team-right">
+          <select name="goals2" class="goals-select">
+            <% for (let i=0;i<=15;i++) { %>
+              <option value="<%= i %>" <%= (m.myBet && m.myBet.pred_goals2===i)?'selected':'' %>><%= i %></option>
+            <% } %>
+          </select>
+          <span class="flag"><%= getFlag(m.team2) %></span>
+          <span class="team-name"><%= m.team2 %></span>
+        </div>
+        <div class="bet-row">
+          <input type="number" name="amount" placeholder="Monto $" min="0.01" step="any"
+            value="<%= m.myBet ? m.myBet.amount : '' %>" class="bet-amount-input" required>
+          <button class="primary" type="submit"><%= m.myBet ? 'Actualizar' : 'Apostar' %></button>
+        </div>
+      </form>
+
+    <%# Vista bloqueada %>
+    <% } else if (m.myBet) { %>
+      <div class="match-form">
+        <div class="team team-left">
+          <span class="team-name"><%= m.team1 %></span>
+          <span class="flag"><%= getFlag(m.team1) %></span>
+          <span class="goals-static"><%= m.myBet.pred_goals1 %></span>
+        </div>
+        <div class="vs">VS</div>
+        <div class="team team-right">
+          <span class="goals-static"><%= m.myBet.pred_goals2 %></span>
+          <span class="flag"><%= getFlag(m.team2) %></span>
+          <span class="team-name"><%= m.team2 %></span>
+        </div>
+      </div>
+      <div class="result">
+        <% if (m.myBet.settled) { %>
+          <% if (m.myBet.result==='exact') { %>
+            🎯 Resultado exacto · Ganaste <b style="color:#10b981">$<%= m.myBet.payout.toFixed(2) %></b>
+            <span class="points" style="background:#10b981">+$<%= (m.myBet.payout - m.myBet.amount).toFixed(2) %></span>
+          <% } else if (m.myBet.result==='outcome') { %>
+            ✅ Ganador correcto · Ganaste <b style="color:#10b981">$<%= m.myBet.payout.toFixed(2) %></b>
+            <span class="points" style="background:#10b981">+$<%= (m.myBet.payout - m.myBet.amount).toFixed(2) %></span>
+          <% } else { %>
+            ❌ Sin suerte · Perdiste <b style="color:#ef4444">$<%= m.myBet.amount.toFixed(2) %></b>
+          <% } %>
+        <% } else { %>
+          Apuesta: <b>$<%= m.myBet.amount.toFixed(2) %></b> · esperando resultado...
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="result"><i>No apostaste en este partido</i></div>
+    <% } %>
+
+  </div>
+<% }); %>
+
+<% } %>
+<%- include('partials/foot') %>

@@ -17,6 +17,8 @@
       <nav>
         <% if (currentUser) { %>
           <a href="/matches">Partidos</a>
+          <a href="/betting">Apuestas</a>
+          <a href="/betting/ranking">💰 Ranking $</a>
           <a href="/ranking">Ranking</a>
           <% if (currentUser.is_admin) { %><a href="/admin">Admin</a><% } %>
           <span class="user">👤 <%= currentUser.nickname %></span>
