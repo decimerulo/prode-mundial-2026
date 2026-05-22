@@ -797,6 +797,43 @@ table.ranking tr.winner td {
   font-size: 1.1rem;
 }
 
+/* ─────────── Instrucciones ─────────── */
+.instr-list {
+  padding-left: 1.2rem;
+  margin: .6rem 0;
+  line-height: 2;
+}
+.instr-list li { margin-bottom: .2rem; }
+
+.instr-steps { display: flex; flex-direction: column; gap: 1.2rem; margin-top: .8rem; }
+
+.instr-step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--fifa-navy, #1F4380);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.instr-example {
+  background: var(--bg-2, #f4f4f4);
+  border-left: 4px solid var(--fifa-navy, #1F4380);
+  border-radius: 0 10px 10px 0;
+  padding: 1rem 1.2rem;
+  margin-top: .6rem;
+}
+.instr-example p { margin: 0 0 .5rem; }
+
 /* ─────────── Responsive ─────────── */
 @media (max-width: 768px) {
   h1 { font-size: 24px; }

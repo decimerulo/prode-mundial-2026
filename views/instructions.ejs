@@ -1,0 +1,166 @@
+<%- include('partials/head', { title: 'Cómo se juega' }) %>
+
+<h1>📖 Cómo se juega</h1>
+
+<div class="card" style="margin-bottom:1.5rem">
+  <p style="font-size:1.05rem;margin:0">
+    La quiniela tiene <strong>dos partes independientes</strong>: los <b>pronósticos</b> (acumulás puntos)
+    y las <b>apuestas</b> (apostás plata por partido). Podés jugar solo la parte de pronósticos,
+    solo apuestas, o las dos.
+  </p>
+</div>
+
+<%# ── Tabla resumen ── %>
+<div style="overflow-x:auto;margin-bottom:2rem">
+  <table class="ranking">
+    <thead>
+      <tr><th></th><th>Pronósticos</th><th>Apuestas</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>Qué es</b></td><td>Predecís marcadores y acumulás puntos</td><td>Apostás dinero por partido</td></tr>
+      <tr><td><b>Para qué</b></td><td>Ranking general de la quiniela</td><td>Ganar o perder plata</td></tr>
+      <tr><td><b>Obligatorio</b></td><td>✅ Sí</td><td>❌ Opcional</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<%# ── PARTE 1 ── %>
+<section class="round">
+  <h2>PARTE 1 — Pronósticos (puntos)</h2>
+
+  <h3 style="margin-top:1.2rem">¿Cómo puntuar?</h3>
+  <div style="overflow-x:auto">
+    <table class="ranking">
+      <thead><tr><th>Resultado</th><th>Puntos</th></tr></thead>
+      <tbody>
+        <tr><td>Acertás el marcador exacto (ej: 2-1)</td><td><b>5 pts</b></td></tr>
+        <tr><td>Acertás quién gana o que empata</td><td><b>2 pts</b></td></tr>
+        <tr><td>Errás</td><td>0 pts</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:1.5rem">Reglas clave</h3>
+  <ul class="instr-list">
+    <li>🔒 Los pronósticos se bloquean <b>1 minuto antes</b> del inicio de cada partido</li>
+    <li>✏️ Podés modificar tu pronóstico hasta ese momento desde la sección <b>Partidos</b></li>
+    <li>🚫 Una vez iniciado el partido no se puede cambiar nada</li>
+  </ul>
+
+  <h3 style="margin-top:1.5rem">Checkpoints de jornada</h3>
+  <p>Al completarse cada jornada aparece en el ranking quién va liderando:</p>
+  <ul class="instr-list">
+    <li>📅 <b>Jornada 1</b> — primer partido de cada grupo (24 partidos en total)</li>
+    <li>📅 <b>Jornada 2</b> — segundo partido de cada grupo (24 partidos)</li>
+    <li>📅 <b>Jornada 3</b> — tercer partido de cada grupo (24 partidos)</li>
+    <li>⚔️ Luego una jornada por fase eliminatoria: Octavos, Cuartos, Semis y Final</li>
+  </ul>
+</section>
+
+<%# ── PARTE 2 ── %>
+<section class="round">
+  <h2>PARTE 2 — Apuestas (dinero)</h2>
+
+  <h3 style="margin-top:1.2rem">Paso a paso</h3>
+  <div class="instr-steps">
+
+    <div class="instr-step">
+      <div class="step-num">1</div>
+      <div>
+        <b>Depositá para la jornada</b><br>
+        Antes de que empiece la jornada, ingresá cuánto querés jugar desde la sección <b>Apuestas</b>.
+        Ese monto se suma a tu saldo acumulativo.
+      </div>
+    </div>
+
+    <div class="instr-step">
+      <div class="step-num">2</div>
+      <div>
+        <b>Apostá partido a partido</b><br>
+        Para cada partido elegís <b>cuánto ponés</b> y predecís el <b>marcador</b>.
+        El ganador (local / empate / visitante) se infiere automáticamente del marcador —
+        no hay que elegirlo por separado. El cierre es el mismo que pronósticos: 1 minuto antes del partido.
+      </div>
+    </div>
+
+    <div class="instr-step">
+      <div class="step-num">3</div>
+      <div>
+        <b>Cómo se reparte al terminar</b><br>
+        <div style="overflow-x:auto;margin-top:.8rem">
+          <table class="ranking">
+            <thead><tr><th>Ganás si…</th><th>Te llevás</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>🎯 Acertás el <b>marcador exacto</b></td>
+                <td>Tu apuesta + <b>70%</b> del pozo perdedor (proporcional a lo apostado)</td>
+              </tr>
+              <tr>
+                <td>✅ Acertás <b>quién gana</b> (o empate)</td>
+                <td>Tu apuesta + <b>30%</b> del pozo perdedor (proporcional)</td>
+              </tr>
+              <tr>
+                <td>❌ Errás el resultado</td>
+                <td>Perdés tu apuesta</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small" style="margin-top:.6rem">
+          <b>Casos especiales:</b> si nadie acierta el marcador exacto, los de resultado correcto
+          se llevan el <b>100%</b> del pozo perdedor.
+          Si nadie gana, se devuelven todas las apuestas.
+        </p>
+      </div>
+    </div>
+
+    <div class="instr-step">
+      <div class="step-num">4</div>
+      <div>
+        <b>El saldo es acumulativo</b><br>
+        Lo que ganás en una jornada queda disponible para la siguiente.
+        Podés agregar más fondos al inicio de cada jornada desde la sección <b>Apuestas</b>.
+      </div>
+    </div>
+
+  </div>
+
+  <%# ── Ejemplo ── %>
+  <h3 style="margin-top:1.5rem">Ejemplo</h3>
+  <div class="instr-example">
+    <p><b>Partido: Argentina vs Jordan</b></p>
+    <ul class="instr-list">
+      <li>Mauro apuesta <b>$100</b> → predice <b>2-0</b> (Argentina gana)</li>
+      <li>Diego apuesta <b>$200</b> → predice <b>1-0</b> (Argentina gana)</li>
+      <li>Juan apuesta <b>$50</b> → predice <b>0-0</b> (empate)</li>
+    </ul>
+    <p><b>Resultado real: Argentina 2-0 Jordan ✅</b></p>
+    <ul class="instr-list">
+      <li>Pozo total: $350 · Pozo perdedor (Juan): $50</li>
+      <li>Mauro acertó <b>exacto</b> (2-0) → gana $100 + 70%×$50×(100/300) = <b>$111.67</b> 🎯</li>
+      <li>Diego acertó <b>exacto</b> (1-0 ≠ 2-0… no, solo acertó ganador) → gana $200 + 30%×$50×(200/300) = <b>$210.00</b> ✅</li>
+      <li>Juan erró → pierde <b>$50</b> ❌</li>
+    </ul>
+  </div>
+</section>
+
+<%# ── Navegación rápida ── %>
+<section class="round">
+  <h2>Navegación rápida</h2>
+  <div style="overflow-x:auto">
+    <table class="ranking">
+      <thead><tr><th>Sección</th><th>Qué encontrás</th></tr></thead>
+      <tbody>
+        <tr><td>⚽ <b>Partidos</b></td><td>Cargá tus pronósticos de marcadores antes del cierre</td></tr>
+        <tr><td>💰 <b>Apuestas</b></td><td>Depositá fondos y apostá por partido</td></tr>
+        <tr><td>💰 <b>Ranking $</b></td><td>Saldos, ganancia neta y estadísticas de apuestas</td></tr>
+        <tr><td>🏆 <b>Ranking</b></td><td>Tabla de puntos de pronósticos y checkpoints por jornada</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="small" style="margin-top:1rem;text-align:center">
+    Los resultados se actualizan automáticamente — los puntos y el dinero se calculan solos al terminar cada partido.
+  </p>
+</section>
+
+<%- include('partials/foot') %>

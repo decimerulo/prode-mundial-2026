@@ -227,6 +227,10 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
+app.get('/instructions', (req, res) => {
+  res.render('instructions');
+});
+
 // ----- Registro -----
 app.get('/register', (req, res) => {
   if (req.session.user) return res.redirect('/matches');
